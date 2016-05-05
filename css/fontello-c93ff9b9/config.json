@@ -1,0 +1,22 @@
+{
+  "name": "setting",
+  "css_prefix_text": "icon-",
+  "css_use_suffix": false,
+  "hinting": true,
+  "units_per_em": 1000,
+  "ascent": 850,
+  "glyphs": [
+    {
+      "uid": "3a89ddb1c81111c15d6c4e26cc3c546a",
+      "css": "cog-outline",
+      "code": 59392,
+      "src": "typicons"
+    },
+    {
+      "uid": "e99461abfef3923546da8d745372c995",
+      "css": "cog-1",
+      "code": 59393,
+      "src": "fontawesome"
+    }
+  ]
+}
