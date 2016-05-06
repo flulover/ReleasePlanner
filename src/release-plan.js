@@ -5,7 +5,9 @@
 
 var Settings = React.createClass({
     getInitialState: function () {
-        return {isPanelClosed: true};
+        return {
+            isPanelClosed: true
+        };
     },
     toggleSettingPanel: function () {
         this.setState({isPanelClosed: !this.state.isPanelClosed});
@@ -41,9 +43,25 @@ var ReleasePlan = React.createClass({
             iterationLength: 0
         };
     },
+    componentDidMount: function () {
+        var Settings = AV.Object.extend('Settings');
+        var query = new AV.Query(Settings);
+        var self = this;
+        query.find().then(function(results) {
+            var settings = results[0];
+            self.setState({
+                developerCount: settings.get('developerCount'),
+                velocity: settings.get('velocity'),
+                iterationLength: settings.get('iterationLength')
+            });
+
+        }, function(error) {
+            console.log('Error: ' + error.code + ' ' + error.message);
+        });
+    },
     componentDidUpdate: function () {
         this.save();
-    },
+   },
     handleSettingsChanged: function (settings) {
         this.setState(settings);
     },
@@ -94,10 +112,10 @@ var ReleasePlan = React.createClass({
     render: function () {
         return (
             <div>
-                <Settings settings={this.state} settingsChanged={this.handleSettingsChanged}></Settings>
-                <div>{this.state.developerCount}</div>
-                <div>{this.state.velocity}</div>
-                <div>{this.state.iterationLength}</div>
+                <Settings developerCount={this.state.developerCount} settingsChanged={this.handleSettingsChanged}></Settings>
+                <div>Developer Count: {this.state.developerCount}</div>
+                <div>Velocity: {this.state.velocity}</div>
+                <div>Iteration Length: {this.state.iterationLength} Week</div>
             </div>
         );
     }
