@@ -7,6 +7,9 @@ var Settings = React.createClass({
     getInitialState: function () {
         return {isPanelClosed: true};
     },
+    toggleSettingPanel: function () {
+        this.setState({isPanelClosed: !this.state.isPanelClosed});
+    },
     handleDeveloperCountChanged: function (e) {
         this.props.settingsChanged({developerCount: parseInt(e.target.value)});
     },
@@ -15,9 +18,6 @@ var Settings = React.createClass({
     },
     handleIterationLengthChanged: function (e) {
         this.props.settingsChanged({iterationLength: parseInt(e.target.value)});
-    },
-    toggleSettingPanel: function () {
-        this.setState({isPanelClosed: !this.state.isPanelClosed});
     },
     render: function () {
         return (
