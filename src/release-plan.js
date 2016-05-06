@@ -47,19 +47,48 @@ var ReleasePlan = React.createClass({
     handleSettingsChanged: function (settings) {
         this.setState(settings);
     },
-    save: function () {
+    createNewSettings: function () {
         var Settings = AV.Object.extend('Settings');
         var settings = new Settings();
         settings.set('developerCount', this.state.developerCount);
         settings.set('velocity', this.state.velocity);
         settings.set('iterationLength', this.state.iterationLength);
-        settings.save().then(function(post) {
-            // 成功保存之后，执行其他逻辑.
-            console.log('New object created with objectId: ' + post.id);
-        }, function(err) {
-            // 失败之后执行其他逻辑
-            // error 是 AV.Error 的实例，包含有错误码和描述信息.
+        settings.save().then(function (settings) {
+            console.log('New object created with objectId: ' + settings.id);
+        }, function (err) {
             console.log('Failed to create new object, with error message: ' + err.message);
+        });
+    },
+    updateSettings: function (settings) {
+        var Settings = AV.Object.extend('Settings');
+        var query = new AV.Query(Settings);
+        var self = this;
+        query.get(settings.id).then(function (settings) {
+            settings.set('developerCount', self.state.developerCount);
+            settings.set('velocity', self.state.velocity);
+            settings.set('iterationLength', self.state.iterationLength);
+            settings.save().then(function (settings) {
+                console.log('Update object with objectId: ' + settings.id);
+            }, function (err) {
+                console.log('Failed to update object, with error message: ' + err.message);
+            });
+        }, function (error) {
+            console.log('Error: ' + error.code + ' ' + error.message);
+        });
+    },
+    save: function () {
+        var Settings = AV.Object.extend('Settings');
+        var query = new AV.Query(Settings);
+        var self = this;
+        query.find().then(function(results) {
+            if (results.length == 0){
+                self.createNewSettings();
+            }
+            else {
+                self.updateSettings(results[0]);
+            }
+        }, function(error) {
+            console.log('Error: ' + error.code + ' ' + error.message);
         });
     },
     render: function () {
