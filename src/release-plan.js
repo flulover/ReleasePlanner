@@ -42,7 +42,7 @@ var ReleaseForm = React.createClass({
             name: '',
             scope: 0,
             startDate: Date.parse('1999/09/09'),
-            regressionIteration: 1,
+            regressionIterations: 1,
             buffer: 0.5
         };
     },
@@ -61,9 +61,9 @@ var ReleaseForm = React.createClass({
             startDate: Date.parse(e.target.value)
         });
     },
-    handleRegressionIterationChanged: function (e) {
+    handleRegressionIterationsChanged: function (e) {
         this.setState({
-            regressionIteration: parseInt(e.target.value)
+            regressionIterations: parseInt(e.target.value)
         });
     },
     handleBufferChanged: function (e) {
@@ -85,10 +85,10 @@ var ReleaseForm = React.createClass({
                <form hidden={this.state.isFormClosed} onSubmit={this.handleSubmit}>
                    <h3>Create Release</h3>
                    <label>Name <input type="text" onChange={this.handleNameChanged} /></label><br/>
-                   <label>Scope <input type="text" onChange={this.handleScopeChanged} /></label><br/>
+                   <label>Scope <input type="number" onChange={this.handleScopeChanged} /></label><br/>
                    <label>Start Date <input type="date" onChange={this.handleStartDateChanged} /></label><br/>
-                   <label>Regression Iteration <input type="text" onChange={this.handleRegressionIterationChanged} /></label><br/>
-                   <label>Buffer <input type="text" onChange={this.handleBufferChanged}/></label><br/>
+                   <label>Regression Iteration <input type="number" onChange={this.handleRegressionIterationsChanged} /></label><br/>
+                   <label>Buffer <input type="number" onChange={this.handleBufferChanged}/></label><br/>
                    <input type="submit" value="Save"/>
                    <input type="button" value="Cancel"/>
                </form>
@@ -98,9 +98,41 @@ var ReleaseForm = React.createClass({
 });
 
 var ReleaseList = React.createClass({
+    createReleaseNode: function (release) {
+        return (
+            <tr>
+                <td>{release.get('name')}</td>
+                <td>{release.get('scope')}</td>
+                <td>Development Iteration</td>
+                <td>{release.get('regressionIterations')}</td>
+                <td>{release.get('buffer')}</td>
+                <td>Release Date(Best)</td>
+                <td>Release Date(Worst)</td>
+                <td>Note</td>
+                <td>Actions</td>
+            </tr>
+        );
+    },
     render: function () {
        return (
-           <div>Release List</div>
+           <table>
+               <thead>
+               <tr>
+                   <th>Release Name</th>
+                   <th>Scope</th>
+                   <th>Development Iterations</th>
+                   <th>Regression Iterations</th>
+                   <th>Buffer</th>
+                   <th>Release Date(Best)</th>
+                   <th>Release Date(Worst)</th>
+                   <th>Note</th>
+                   <th>Actions</th>
+               </tr>
+               </thead>
+               <tbody>
+                   {this.props.items.map(this.createReleaseNode)}
+               </tbody>
+           </table>
        );
     }
 });
@@ -183,7 +215,14 @@ var ReleasePlan = React.createClass({
     handleReleaseSubmit: function (release) {
         var Release = AV.Object.extend('Release');
         var release = new Release(release);
-        release.save();
+        var self = this;
+        release.save().then(
+            function (release) {
+                self.setState({
+                    releaseList: self.state.releaseList.concat(release)
+                })
+            }
+        );
     },
     render: function () {
         return (
@@ -193,7 +232,7 @@ var ReleasePlan = React.createClass({
                 <div>Velocity: {this.state.velocity}</div>
                 <div>Iteration Length: {this.state.iterationLength} Week</div>
                 <ReleaseForm onReleaseSubmit={this.handleReleaseSubmit}></ReleaseForm>
-                <ReleaseList></ReleaseList>
+                <ReleaseList items={this.state.releaseList}></ReleaseList>
             </div>
         );
     }
