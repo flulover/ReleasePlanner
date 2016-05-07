@@ -46,37 +46,23 @@ var ReleaseForm = React.createClass({
             buffer: 0.5
         };
     },
-    handleNameChanged: function (e) {
-        this.setState({
-            name: e.target.value
-        });
-    },
-    handleScopeChanged: function (e) {
-        this.setState({
-            scope: parseInt(e.target.value)
-        });
-    },
-    handleStartDateChanged: function (e) {
-        this.setState({
-            startDate: Date.parse(e.target.value)
-        });
-    },
-    handleRegressionIterationsChanged: function (e) {
-        this.setState({
-            regressionIterations: parseInt(e.target.value)
-        });
-    },
-    handleBufferChanged: function (e) {
-        this.setState({
-            buffer: parseFloat(e.target.value)
-        });
-    },
     toggleReleaseForm: function () {
         this.setState({isFormClosed: !this.state.isFormClosed});
     },
     handleSubmit: function (e) {
         e.preventDefault();
-        this.props.onReleaseSubmit(this.state);
+        var name = this.refs.releaseName.value;
+        var scope = this.refs.releaseScope.value;
+        var startDate = this.refs.releaseStartDate.value;
+        var regressionIterations = this.refs.releaseRegressionIterations.value;
+        var buffer = this.refs.releaseBuffer.value;
+        this.props.onReleaseSubmit({
+            name: name,
+            scope: scope,
+            startDate: startDate,
+            regressionIterations: regressionIterations,
+            buffer: buffer
+        });
         this.setState({
             isFormClosed: true
         });
@@ -92,11 +78,11 @@ var ReleaseForm = React.createClass({
                <button onClick={this.toggleReleaseForm}>New Release</button>
                <form hidden={this.state.isFormClosed} onSubmit={this.handleSubmit}>
                    <h3>Create Release</h3>
-                   <label>Name <input type="text" onChange={this.handleNameChanged} /></label><br/>
-                   <label>Scope <input type="number" onChange={this.handleScopeChanged} /></label><br/>
-                   <label>Start Date <input type="date" onChange={this.handleStartDateChanged} /></label><br/>
-                   <label>Regression Iteration <input type="number" onChange={this.handleRegressionIterationsChanged} /></label><br/>
-                   <label>Buffer <input type="number" step="0.1" onChange={this.handleBufferChanged}/></label><br/>
+                   <label>Name <input ref="releaseName" type="text" /></label><br/>
+                   <label>Scope <input ref="releaseScope" type="number" /></label><br/>
+                   <label>Start Date <input ref="releaseStartDate" type="date" /></label><br/>
+                   <label>Regression Iterations <input ref="releaseRegressionIterations" type="number" /></label><br/>
+                   <label>Buffer <input ref="releaseBuffer" type="number" step="0.1" /></label><br/>
                    <input type="submit" value="Save"/>
                    <input type="button" onClick={this.handleCancel} value="Cancel"/>
                </form>
