@@ -81,7 +81,7 @@ var ReleaseForm = React.createClass({
                    <label>Name <input ref="releaseName" type="text" /></label><br/>
                    <label>Scope <input ref="releaseScope" type="number" /></label><br/>
                    <label>Start Date <input ref="releaseStartDate" type="date" /></label><br/>
-                   <label>Regression Iterations <input ref="releaseRegressionIterations" type="number" /></label><br/>
+                   <label>Regression Iterations <input ref="releaseRegressionIterations" type="number" step="0.1"/></label><br/>
                    <label>Buffer <input ref="releaseBuffer" type="number" step="0.1" /></label><br/>
                    <input type="submit" value="Save"/>
                    <input type="button" onClick={this.handleCancel} value="Cancel"/>
@@ -163,39 +163,67 @@ var ReleasePlan = React.createClass({
             console.log('Error: ' + error.code + ' ' + error.message);
         });
     },
-    calculateReleaseDate: function (release) {
+    getIterationLengthByDay: function () {
+        return this.state.iterationLength * 7;
+    },
+    calculateReleasePlanForOneRelease: function (release, startDate, mayDelayDay) {
         var developmentIterations = Math.ceil(release.get('scope') / this.state.velocity);
-        var iterationLengthByDay = this.state.iterationLength * 7;
+        var iterationLengthByDay = this.getIterationLengthByDay();
 
-        var startDate = release.get('startDate');
         var developmentLengthByDay = iterationLengthByDay * developmentIterations;
         var regressionIterationByDay = release.get('regressionIterations') * iterationLengthByDay;
-        var bufferByDay = release.get('buffer') * iterationLengthByDay;
 
-        var bestReleaseDate = new Date(startDate);
+        var bestReleaseDate = startDate;
 
-        bestReleaseDate.setDate(bestReleaseDate.getDate() + developmentLengthByDay + regressionIterationByDay + 1);
+        bestReleaseDate.setDate(bestReleaseDate.getDate() + developmentLengthByDay + regressionIterationByDay);
         release.set('bestReleaseDate', bestReleaseDate.toDateString());
 
         var worstReleaseDate = bestReleaseDate;
-        worstReleaseDate.setDate(bestReleaseDate.getDate() + bufferByDay);
+        worstReleaseDate.setDate(bestReleaseDate.getDate() + mayDelayDay);
         release.set('worstReleaseDate', worstReleaseDate.toDateString());
 
         release.set('developmentIterations', developmentIterations);
         return release;
+    },
+    calculateReleasePlan: function (rawReleaseList) {
+        var firstRelease = rawReleaseList[0];
+        var firstStartDate = this.adjustStartDate(new Date(firstRelease.get('startDate')));
+        var bufferByDay = firstRelease.get('buffer') * this.getIterationLengthByDay();
+
+        var releaseList = [];
+        releaseList.push(this.calculateReleasePlanForOneRelease(firstRelease, firstStartDate, bufferByDay));
+
+        for(var i = 1; i < rawReleaseList.length; ++i){
+            var release = rawReleaseList[i];
+            var lastReleaseDate = new Date(releaseList[i - 1].get('bestReleaseDate'));
+            var startDate = lastReleaseDate;
+            startDate.setDate(lastReleaseDate.getDate() + 1);
+            startDate = this.adjustStartDate(startDate);
+
+            var mayDelayDay = 0;
+            for (var j = 0; j < rawReleaseList.length; ++j){
+                mayDelayDay += rawReleaseList[j].get('buffer') * this.getIterationLengthByDay();
+            }
+            releaseList.push(this.calculateReleasePlanForOneRelease(release, startDate, mayDelayDay));
+        }
+        return releaseList;
+    },
+    adjustStartDate: function (date) {
+        var adjustStartDate = new Date(date);
+        var weekdaySequence = date.getDay();
+        adjustStartDate.setDate(date.getDate() + 4 - weekdaySequence);
+        return adjustStartDate;
     },
     loadReleaseList: function () {
         var Release = AV.Object.extend('Release');
         var query = new AV.Query(Release);
         var self = this;
         query.find().then(function(results) {
-            var releaseList = [];
-            for (var i = 0; i < results.length; i++) {
-                var release = results[i];
-                release = self.calculateReleaseDate(release);
-                releaseList.push(release);
+            if (results.length == 0){
+                return;
             }
 
+            var releaseList = self.calculateReleasePlan(results)
             self.setState({
                 releaseList: releaseList
             });
@@ -257,8 +285,9 @@ var ReleasePlan = React.createClass({
         var self = this;
         release.save().then(
             function (release) {
+                var releaseList = self.calculateReleasePlan(self.state.releaseList.concat(release));
                 self.setState({
-                    releaseList: self.state.releaseList.concat(release)
+                    releaseList: releaseList
                 })
             }
         );
