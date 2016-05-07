@@ -35,6 +35,40 @@ var Settings = React.createClass({
     }
 });
 
+var ReleaseForm = React.createClass({
+    getInitialState: function () {
+        return {
+            isFormClosed: true
+        };
+    },
+    toggleReleaseForm: function () {
+        this.setState({isFormClosed: !this.state.isFormClosed});
+    },
+    render: function () {
+       return (
+           <div>
+               <button onClick={this.toggleReleaseForm}>New Release</button>
+               <form hidden={this.state.isFormClosed}>
+                   <h3>Create Release</h3>
+                   <label>Name <input type="text"/></label><br/>
+                   <label>Scope <input type="text"/></label><br/>
+                   <label>Start Date <input type="date" placeholder="1990/01/02"/></label><br/>
+                   <label>Regression Iteration <input type="text"/></label><br/>
+                   <label>Buffer <input type="text"/></label><br/>
+               </form>
+           </div>
+       );
+    }
+});
+
+var ReleaseList = React.createClass({
+    render: function () {
+       return (
+           <div>Release List</div>
+       );
+    }
+});
+
 var ReleasePlan = React.createClass({
     getInitialState: function () {
         return {
@@ -112,10 +146,12 @@ var ReleasePlan = React.createClass({
     render: function () {
         return (
             <div>
-                <Settings developerCount={this.state.developerCount} settingsChanged={this.handleSettingsChanged}></Settings>
+                <Settings settingsChanged={this.handleSettingsChanged}></Settings>
                 <div>Developer Count: {this.state.developerCount}</div>
                 <div>Velocity: {this.state.velocity}</div>
                 <div>Iteration Length: {this.state.iterationLength} Week</div>
+                <ReleaseForm></ReleaseForm>
+                <ReleaseList></ReleaseList>
             </div>
         );
     }
