@@ -38,23 +38,59 @@ var Settings = React.createClass({
 var ReleaseForm = React.createClass({
     getInitialState: function () {
         return {
-            isFormClosed: true
+            isFormClosed: true,
+            name: '',
+            scope: 0,
+            startDate: Date.parse('1999/09/09'),
+            regressionIteration: 1,
+            buffer: 0.5
         };
+    },
+    handleNameChanged: function (e) {
+        this.setState({
+            name: e.target.value
+        });
+    },
+    handleScopeChanged: function (e) {
+        this.setState({
+            scope: parseInt(e.target.value)
+        });
+    },
+    handleStartDateChanged: function (e) {
+        this.setState({
+            startDate: Date.parse(e.target.value)
+        });
+    },
+    handleRegressionIterationChanged: function (e) {
+        this.setState({
+            regressionIteration: parseInt(e.target.value)
+        });
+    },
+    handleBufferChanged: function (e) {
+        this.setState({
+            buffer: parseFloat(e.target.value)
+        });
     },
     toggleReleaseForm: function () {
         this.setState({isFormClosed: !this.state.isFormClosed});
+    },
+    handleSubmit: function (e) {
+        e.preventDefault();
+        this.props.onReleaseSubmit(this.state);
     },
     render: function () {
        return (
            <div>
                <button onClick={this.toggleReleaseForm}>New Release</button>
-               <form hidden={this.state.isFormClosed}>
+               <form hidden={this.state.isFormClosed} onSubmit={this.handleSubmit}>
                    <h3>Create Release</h3>
-                   <label>Name <input type="text"/></label><br/>
-                   <label>Scope <input type="text"/></label><br/>
-                   <label>Start Date <input type="date" placeholder="1990/01/02"/></label><br/>
-                   <label>Regression Iteration <input type="text"/></label><br/>
-                   <label>Buffer <input type="text"/></label><br/>
+                   <label>Name <input type="text" onChange={this.handleNameChanged} /></label><br/>
+                   <label>Scope <input type="text" onChange={this.handleScopeChanged} /></label><br/>
+                   <label>Start Date <input type="date" onChange={this.handleStartDateChanged} /></label><br/>
+                   <label>Regression Iteration <input type="text" onChange={this.handleRegressionIterationChanged} /></label><br/>
+                   <label>Buffer <input type="text" onChange={this.handleBufferChanged}/></label><br/>
+                   <input type="submit" value="Save"/>
+                   <input type="button" value="Cancel"/>
                </form>
            </div>
        );
@@ -74,7 +110,8 @@ var ReleasePlan = React.createClass({
         return {
             developerCount: 0,
             velocity: 0,
-            iterationLength: 0
+            iterationLength: 0,
+            releaseList: []
         };
     },
     componentDidMount: function () {
@@ -143,6 +180,11 @@ var ReleasePlan = React.createClass({
             console.log('Error: ' + error.code + ' ' + error.message);
         });
     },
+    handleReleaseSubmit: function (release) {
+        var Release = AV.Object.extend('Release');
+        var release = new Release(release);
+        release.save();
+    },
     render: function () {
         return (
             <div>
@@ -150,7 +192,7 @@ var ReleasePlan = React.createClass({
                 <div>Developer Count: {this.state.developerCount}</div>
                 <div>Velocity: {this.state.velocity}</div>
                 <div>Iteration Length: {this.state.iterationLength} Week</div>
-                <ReleaseForm></ReleaseForm>
+                <ReleaseForm onReleaseSubmit={this.handleReleaseSubmit}></ReleaseForm>
                 <ReleaseList></ReleaseList>
             </div>
         );
