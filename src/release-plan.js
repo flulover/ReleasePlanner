@@ -94,7 +94,7 @@ var ReleaseForm = React.createClass({
 var ReleaseList = React.createClass({
     createReleaseNode: function (release) {
         return (
-            <tr>
+            <tr key={release.id}>
                 <td>{release.get('name')}</td>
                 <td>{release.get('scope')}</td>
                 <td>Development Iteration</td>
