@@ -97,11 +97,11 @@ var ReleaseList = React.createClass({
             <tr key={release.id}>
                 <td>{release.get('name')}</td>
                 <td>{release.get('scope')}</td>
-                <td>Development Iteration</td>
+                <td>{release.get('developmentIterations')}</td>
                 <td>{release.get('regressionIterations')}</td>
                 <td>{release.get('buffer')}</td>
-                <td>Release Date(Best)</td>
-                <td>Release Date(Worst)</td>
+                <td>{release.get('bestReleaseDate')}</td>
+                <td>{release.get('worstReleaseDate')}</td>
                 <td>Note</td>
                 <td>Actions</td>
             </tr>
@@ -142,10 +142,9 @@ var ReleasePlan = React.createClass({
     },
     componentDidMount: function () {
         this.loadSettings();
-        this.loadReleaseList();
     },
     componentDidUpdate: function () {
-        this.save();
+        this.saveSettings();
    },
     loadSettings: function () {
         var Settings = AV.Object.extend('Settings');
@@ -159,17 +158,46 @@ var ReleasePlan = React.createClass({
                 iterationLength: settings.get('iterationLength')
             });
 
+            self.loadReleaseList();
         }, function(error) {
             console.log('Error: ' + error.code + ' ' + error.message);
         });
+    },
+    calculateReleaseDate: function (release) {
+        var developmentIterations = Math.ceil(release.get('scope') / this.state.velocity);
+        var iterationLengthByDay = this.state.iterationLength * 7;
+
+        var startDate = release.get('startDate');
+        var developmentLengthByDay = iterationLengthByDay * developmentIterations;
+        var regressionIterationByDay = release.get('regressionIterations') * iterationLengthByDay;
+        var bufferByDay = release.get('buffer') * iterationLengthByDay;
+
+        var bestReleaseDate = new Date(startDate);
+
+        bestReleaseDate.setDate(bestReleaseDate.getDate() + developmentLengthByDay + regressionIterationByDay + 1);
+        release.set('bestReleaseDate', bestReleaseDate.toDateString());
+
+        var worstReleaseDate = bestReleaseDate;
+        worstReleaseDate.setDate(bestReleaseDate.getDate() + bufferByDay);
+        release.set('worstReleaseDate', worstReleaseDate.toDateString());
+
+        release.set('developmentIterations', developmentIterations);
+        return release;
     },
     loadReleaseList: function () {
         var Release = AV.Object.extend('Release');
         var query = new AV.Query(Release);
         var self = this;
         query.find().then(function(results) {
+            var releaseList = [];
+            for (var i = 0; i < results.length; i++) {
+                var release = results[i];
+                release = self.calculateReleaseDate(release);
+                releaseList.push(release);
+            }
+
             self.setState({
-                releaseList: results
+                releaseList: releaseList
             });
 
         }, function(error) {
@@ -208,7 +236,7 @@ var ReleasePlan = React.createClass({
             console.log('Error: ' + error.code + ' ' + error.message);
         });
     },
-    save: function () {
+    saveSettings: function () {
         var Settings = AV.Object.extend('Settings');
         var query = new AV.Query(Settings);
         var self = this;
