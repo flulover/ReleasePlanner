@@ -77,6 +77,14 @@ var ReleaseForm = React.createClass({
     handleSubmit: function (e) {
         e.preventDefault();
         this.props.onReleaseSubmit(this.state);
+        this.setState({
+            isFormClosed: true
+        });
+    },
+    handleCancel: function () {
+        this.setState({
+            isFormClosed: true
+        });
     },
     render: function () {
        return (
@@ -88,9 +96,9 @@ var ReleaseForm = React.createClass({
                    <label>Scope <input type="number" onChange={this.handleScopeChanged} /></label><br/>
                    <label>Start Date <input type="date" onChange={this.handleStartDateChanged} /></label><br/>
                    <label>Regression Iteration <input type="number" onChange={this.handleRegressionIterationsChanged} /></label><br/>
-                   <label>Buffer <input type="number" onChange={this.handleBufferChanged}/></label><br/>
+                   <label>Buffer <input type="number" step="0.1" onChange={this.handleBufferChanged}/></label><br/>
                    <input type="submit" value="Save"/>
-                   <input type="button" value="Cancel"/>
+                   <input type="button" onClick={this.handleCancel} value="Cancel"/>
                </form>
            </div>
        );
@@ -147,6 +155,13 @@ var ReleasePlan = React.createClass({
         };
     },
     componentDidMount: function () {
+        this.loadSettings();
+        this.loadReleaseList();
+    },
+    componentDidUpdate: function () {
+        this.save();
+   },
+    loadSettings: function () {
         var Settings = AV.Object.extend('Settings');
         var query = new AV.Query(Settings);
         var self = this;
@@ -162,9 +177,19 @@ var ReleasePlan = React.createClass({
             console.log('Error: ' + error.code + ' ' + error.message);
         });
     },
-    componentDidUpdate: function () {
-        this.save();
-   },
+    loadReleaseList: function () {
+        var Release = AV.Object.extend('Release');
+        var query = new AV.Query(Release);
+        var self = this;
+        query.find().then(function(results) {
+            self.setState({
+                releaseList: results
+            });
+
+        }, function(error) {
+            console.log('Error: ' + error.code + ' ' + error.message);
+        });
+    },
     handleSettingsChanged: function (settings) {
         this.setState(settings);
     },
