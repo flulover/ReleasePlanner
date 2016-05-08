@@ -54,7 +54,10 @@ var ReleaseForm = React.createClass({
                 fact.impactedPoints = this.refs['impactedPoints-' + i].value;
                 fact.impactedNote = this.refs['impactedNote-' + i].value;
             }else if (type === 'publicHoliday'){
-
+                fact.impactedNote = this.refs['impactedNote-' + i].value;
+                fact.customImpactedPoints = this.refs['customImpactedPoints-' + i].value;
+                fact.startDate = this.refs['startDate-' + i].value;
+                fact.endDate = this.refs['endDate-' + i].value;
             }else if (type === 'personalLeave'){
 
             }
@@ -127,7 +130,7 @@ var ReleaseForm = React.createClass({
                     {this.state.factList.map(function (fact, index) {
                         return (
                             <div key={'fact' + index }>
-                                <select value="other" ref={'factType-' + index}  id={'factType-' + index} onChange={self.handleFactTypeChange}>
+                                <select defaultValue="other" ref={'factType-' + index}  id={'factType-' + index} onChange={self.handleFactTypeChange}>
                                     <option value="publicHoliday">Public Holiday</option>
                                     <option value="personalLeave">Personal Leave</option>
                                     <option value="other">Other</option>
@@ -139,6 +142,22 @@ var ReleaseForm = React.createClass({
                                     <label>Note
                                         <textarea ref={'impactedNote-' + index} name="" id="" cols="20" rows="4"></textarea>
                                     </label>
+                                </div>
+                                <div hidden={self.state.factList[index].type != 'publicHoliday'}>
+                                    <label>
+                                        Start Date
+                                        <input type="date" ref={'startDate-' + index}/>
+                                    </label>
+                                    <label>
+                                        End Date
+                                        <input type="date" ref={'endDate-' + index}/>
+                                    </label><br/>
+                                    <label>Note
+                                        <textarea ref={'impactedNote-' + index} name="" id="" cols="20" rows="4"></textarea>
+                                    </label><br/>
+                                    <label>Custom Impact Points
+                                        <input type="number" ref={'customImpactedPoints-' + index}/>
+                                    </label><br/>
                                 </div>
                             </div>
                         );
@@ -263,11 +282,33 @@ var ReleasePlan = React.createClass({
 
         return map[wayToCalculateDevelopmentIteration];
     },
+    getVelocityForOneDay: function () {
+        var workDayForeachIteration = this.getIterationLengthByDay()*5/7;
+        var velocityForOneDay = this.state.velocity / workDayForeachIteration;
+        return velocityForOneDay;
+    },
+    getDiffDays: function (startDate, endDate) {
+        var oneDay = 24*60*60*1000;
+        return Math.round(Math.abs((endDate.getTime() - startDate.getTime())/(oneDay)));
+    },
     getImpactedPoint: function (release) {
         var factList = release.get('factList');
         var impactedPoints = 0;
         for(var i = 0; i < factList.length; ++i){
-            impactedPoints += parseInt(factList[i].impactedPoints);
+            var fact = factList[i];
+            if (fact.type === 'other'){
+                impactedPoints += parseInt(factList[i].impactedPoints);
+            }else if (fact.type === 'publicHoliday' ){
+                if (parseInt(fact.customImpactedPoints)){
+                    fact.impactedPoints = parseInt(fact.customImpactedPoints);
+                    impactedPoints += fact.impactedPoints;
+                }else{
+                    var velocityForOneDay = this.getVelocityForOneDay();
+                    var diffDays = this.getDiffDays(new Date(fact['startDate']), new Date(fact['endDate']));
+                    fact.impactedPoints = Math.ceil(diffDays * velocityForOneDay);
+                    impactedPoints += fact.impactedPoints;
+                }
+            }
         }
 
         return impactedPoints
