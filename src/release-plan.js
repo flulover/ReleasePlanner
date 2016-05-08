@@ -56,12 +56,15 @@ var ReleaseForm = React.createClass({
         var startDate = this.refs.releaseStartDate.value;
         var regressionIterations = this.refs.releaseRegressionIterations.value;
         var buffer = this.refs.releaseBuffer.value;
+        var wayToCalculateDevelopmentIteration = document.querySelector('input[name="wayToCalculateDevelopmentIteration"]:checked').value;
+
         this.props.onReleaseSubmit({
             name: name,
             scope: scope,
             startDate: startDate,
             regressionIterations: regressionIterations,
-            buffer: buffer
+            buffer: buffer,
+            wayToCalculateDevelopmentIteration: wayToCalculateDevelopmentIteration
         });
         this.setState({
             isFormClosed: true
@@ -83,6 +86,11 @@ var ReleaseForm = React.createClass({
                    <label>Start Date <input ref="releaseStartDate" type="date" /></label><br/>
                    <label>Regression Iterations <input ref="releaseRegressionIterations" type="number" step="0.1"/></label><br/>
                    <label>Buffer <input ref="releaseBuffer" type="number" step="0.1" /></label><br/>
+                   <label  htmlFor="">Way To Calculate Development Iteration
+                       <input type="radio" name="wayToCalculateDevelopmentIteration" ref="Ceil" value="Ceil" />Ceil
+                       <input type="radio" name="wayToCalculateDevelopmentIteration" ref="RoundToHalf" value="RoundToHalf"/>Round to Half(2.3 or 2.7 to 2.5)
+                       <input type="radio" name="wayToCalculateDevelopmentIteration" ref="Actually" value="Actually"/>Actually<br/>
+                   </label>
                    <input type="submit" value="Save"/>
                    <input type="button" onClick={this.handleCancel} value="Cancel"/>
                </form>
@@ -166,8 +174,32 @@ var ReleasePlan = React.createClass({
     getIterationLengthByDay: function () {
         return this.state.iterationLength * 7;
     },
+    getWayToCalculateDevelopmentIterationFunc: function (wayToCalculateDevelopmentIteration) {
+        if (wayToCalculateDevelopmentIteration === ''
+            || wayToCalculateDevelopmentIteration === undefined){
+            return Math.ceil;
+        }
+
+        var justReturn = function (iterationLength) {
+           return iterationLength;
+        };
+
+        var roundToHalf = function (iterationLength) {
+            var integerPart = Math.floor(iterationLength);
+            return integerPart + 0.5;
+        };
+
+        var map = {
+            Ceil: Math.ceil,
+            RoundToHalf: roundToHalf,
+            Actually: justReturn
+        };
+
+        return map[wayToCalculateDevelopmentIteration];
+    },
     calculateReleasePlanForOneRelease: function (release, startDate, mayDelayDay) {
-        var developmentIterations = Math.ceil(release.get('scope') / this.state.velocity);
+        var wayToCalculateDevelopmentIterationFunc = this.getWayToCalculateDevelopmentIterationFunc(release.get('wayToCalculateDevelopmentIteration'));
+        var developmentIterations = wayToCalculateDevelopmentIterationFunc(release.get('scope') / this.state.velocity);
         var iterationLengthByDay = this.getIterationLengthByDay();
 
         var developmentLengthByDay = iterationLengthByDay * developmentIterations;
