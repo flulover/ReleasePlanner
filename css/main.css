@@ -4,3 +4,9 @@
 .icon-cog-outline:hover{
    margin-left: 1px;
 }
+
+div{
+   border-style: solid;
+   border-width: 1px;
+   border-color: #9cd9ff;
+}

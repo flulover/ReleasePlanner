@@ -38,25 +38,48 @@ var Settings = React.createClass({
 var ReleaseForm = React.createClass({
     getInitialState: function () {
         return {
-            isFormClosed: true,
+            isFormClosed: false,
             name: '',
             scope: 0,
             startDate: Date.parse('1999/09/09'),
             regressionIterations: 1,
-            buffer: 0.5
+            buffer: 0.5,
+            wayToCalculateDevelopmentIteration: 'Ceil',
+            factList: []
         };
     },
     toggleReleaseForm: function () {
         this.setState({isFormClosed: !this.state.isFormClosed});
     },
+    getFactList: function () {
+        var factList = [];
+        for (var i = 0; i < this.state.factList.length; ++i){
+            var fact = this.state.factList[i];
+            var type = fact.type;
+            if (type === 'other'){
+                fact.impactedPoints = this.refs['impactedPoints-' + i].value;
+                fact.impactedNote = this.refs['impactedNote-' + i].value;
+            }else if (type === 'publicHoliday'){
+
+            }else if (type === 'personalLeave'){
+
+            }
+
+            factList.push(fact);
+        }
+        console.log(factList);
+        return factList;
+    },
     handleSubmit: function (e) {
         e.preventDefault();
-        var name = this.refs.releaseName.value;
-        var scope = this.refs.releaseScope.value;
-        var startDate = this.refs.releaseStartDate.value;
-        var regressionIterations = this.refs.releaseRegressionIterations.value;
-        var buffer = this.refs.releaseBuffer.value;
-        var wayToCalculateDevelopmentIteration = document.querySelector('input[name="wayToCalculateDevelopmentIteration"]:checked').value;
+        var name = this.refs.releaseName.value || 'No Name';
+        var scope = this.refs.releaseScope.value || 0;
+        var startDate = this.refs.releaseStartDate.value || '1900-01-01';
+        var regressionIterations = this.refs.releaseRegressionIterations.value || 1;
+        var buffer = this.refs.releaseBuffer.value || 0.5;
+        var checkedWay = document.querySelector('input[name="wayToCalculateDevelopmentIteration"]:checked');
+        var wayToCalculateDevelopmentIteration = checkedWay ? checkedWay.value : 'Ceil';
+        var factList = this.getFactList();
 
         this.props.onReleaseSubmit({
             name: name,
@@ -64,7 +87,8 @@ var ReleaseForm = React.createClass({
             startDate: startDate,
             regressionIterations: regressionIterations,
             buffer: buffer,
-            wayToCalculateDevelopmentIteration: wayToCalculateDevelopmentIteration
+            wayToCalculateDevelopmentIteration: wayToCalculateDevelopmentIteration,
+            factList: factList
         });
         this.setState({
             isFormClosed: true
@@ -75,27 +99,64 @@ var ReleaseForm = React.createClass({
             isFormClosed: true
         });
     },
+    handleAddFact: function () {
+        var fact = {
+            type: 'other'
+        };
+
+        var factList = this.state.factList.concat(fact);
+        this.setState({factList: factList});
+    },
+    handleFactTypeChange: function (e) {
+        var index = parseInt(e.target.id.split('-')[1]);
+        var state = this.state;
+        state.factList[index].type = e.target.value;
+        this.setState(state);
+    },
     render: function () {
-       return (
-           <div>
-               <button onClick={this.toggleReleaseForm}>New Release</button>
-               <form hidden={this.state.isFormClosed} onSubmit={this.handleSubmit}>
-                   <h3>Create Release</h3>
-                   <label>Name <input ref="releaseName" type="text" /></label><br/>
-                   <label>Scope <input ref="releaseScope" type="number" /></label><br/>
-                   <label>Start Date <input ref="releaseStartDate" type="date" /></label><br/>
-                   <label>Regression Iterations <input ref="releaseRegressionIterations" type="number" step="0.1"/></label><br/>
-                   <label>Buffer <input ref="releaseBuffer" type="number" step="0.1" /></label><br/>
-                   <label  htmlFor="">Way To Calculate Development Iteration
-                       <input type="radio" name="wayToCalculateDevelopmentIteration" ref="Ceil" value="Ceil" />Ceil
-                       <input type="radio" name="wayToCalculateDevelopmentIteration" ref="RoundToHalf" value="RoundToHalf"/>Round to Half(2.3 or 2.7 to 2.5)
-                       <input type="radio" name="wayToCalculateDevelopmentIteration" ref="Actually" value="Actually"/>Actually<br/>
-                   </label>
-                   <input type="submit" value="Save"/>
-                   <input type="button" onClick={this.handleCancel} value="Cancel"/>
-               </form>
-           </div>
-       );
+        var self = this;
+        return (
+            <div>
+                <button onClick={this.toggleReleaseForm}>New Release</button>
+                <form hidden={this.state.isFormClosed} onSubmit={this.handleSubmit}>
+                    <h3>Create Release</h3>
+                    <label>Name <input ref="releaseName" type="text" defaultValue="ais 2a" /></label><br/>
+                    <label>Scope <input ref="releaseScope" type="number" defaultValue="100"/></label><br/>
+                    <label>Start Date <input ref="releaseStartDate" type="date" /></label><br/>
+                    <label>Regression Iterations <input ref="releaseRegressionIterations" type="number" step="0.1" defaultValue="1"/></label><br/>
+                    <label>Buffer <input ref="releaseBuffer" type="number" step="0.1" defaultValue="0.5"/></label><br/>
+                    <label>Way To Calculate Development Iteration
+                        <input type="radio" name="wayToCalculateDevelopmentIteration" ref="Ceil" value="Ceil" />Ceil
+                        <input type="radio" name="wayToCalculateDevelopmentIteration" ref="RoundToHalf" value="RoundToHalf"/>Round to Half(2.3 or 2.7 to 2.5)
+                        <input type="radio" name="wayToCalculateDevelopmentIteration" ref="Actually" value="Actually"/>Actually<br/>
+                    </label>
+
+                    {this.state.factList.map(function (fact, index) {
+                        return (
+                            <div key={'fact' + index }>
+                                <select value="other" ref={'factType-' + index}  id={'factType-' + index} onChange={self.handleFactTypeChange}>
+                                    <option value="publicHoliday">Public Holiday</option>
+                                    <option value="personalLeave">Personal Leave</option>
+                                    <option value="other">Other</option>
+                                </select>
+                                <div hidden={self.state.factList[index].type != 'other'}>
+                                    <label>Impacted Points
+                                        <input type="number" ref={'impactedPoints-' + index}/>
+                                    </label><br/>
+                                    <label>Note
+                                        <textarea ref={'impactedNote-' + index} name="" id="" cols="20" rows="4"></textarea>
+                                    </label>
+                                </div>
+                            </div>
+                        );
+                    })}
+                    <input type="button" value="Add Fact" onClick={this.handleAddFact}/><br/><br/>
+
+                    <input type="submit" value="Save"/>
+                    <input type="button" onClick={this.handleCancel} value="Cancel"/>
+                </form>
+            </div>
+        );
     }
 });
 
