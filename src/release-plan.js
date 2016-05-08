@@ -154,6 +154,18 @@ var ReleaseForm = React.createClass({
 });
 
 var ReleaseList = React.createClass({
+    createNoteNode: function (factList) {
+        return (
+            <ul>
+            {factList.map(function (fact, index) {
+                return (
+                <li key={'fact-note-' + index}>
+                    {fact.impactedNote + '(' + fact.impactedPoints + ' point' + ((Math.abs(fact.impactedPoints) > 1) ? 's': '') + ')'}
+                </li>);
+            })}
+            </ul>
+        );
+    },
     createReleaseNode: function (release) {
         return (
             <tr key={release.id}>
@@ -164,7 +176,7 @@ var ReleaseList = React.createClass({
                 <td>{release.get('buffer')}</td>
                 <td>{release.get('bestReleaseDate')}</td>
                 <td>{release.get('worstReleaseDate')}</td>
-                <td>Note</td>
+                <td>{this.createNoteNode(release.get('factList'))}</td>
                 <td>Actions</td>
             </tr>
         );
@@ -186,7 +198,7 @@ var ReleaseList = React.createClass({
                </tr>
                </thead>
                <tbody>
-                   {this.props.items.map(this.createReleaseNode)}
+                   {this.props.releases.map(this.createReleaseNode)}
                </tbody>
            </table>
        );
@@ -264,11 +276,11 @@ var ReleasePlan = React.createClass({
         var wayToCalculateDevelopmentIterationFunc = this.getWayToCalculateDevelopmentIterationFunc(release.get('wayToCalculateDevelopmentIteration'));
         var idealDevelopmentIterations = wayToCalculateDevelopmentIterationFunc(release.get('scope') / this.state.velocity);
         var iterationLengthByDay = this.getIterationLengthByDay();
-
         var lastIterationPoints = release.get('scope') - (idealDevelopmentIterations - 1) * this.state.velocity;
         var impactedPoints = this.getImpactedPoint(release);
         var tailIterationCount = wayToCalculateDevelopmentIterationFunc((lastIterationPoints + impactedPoints*-1)/this.state.velocity);
         var actualDevelopmentIterationCount = idealDevelopmentIterations - 1 + tailIterationCount;
+        release.set('developmentIterations', actualDevelopmentIterationCount);
 
         var developmentLengthByDay = iterationLengthByDay * actualDevelopmentIterationCount;
         var regressionIterationByDay = release.get('regressionIterations') * iterationLengthByDay;
@@ -282,7 +294,6 @@ var ReleasePlan = React.createClass({
         worstReleaseDate.setDate(bestReleaseDate.getDate() + mayDelayDay);
         release.set('worstReleaseDate', worstReleaseDate.toDateString());
 
-        release.set('developmentIterations', actualDevelopmentIterationCount);
         return release;
     },
     calculateReleasePlan: function (rawReleaseList) {
@@ -400,7 +411,7 @@ var ReleasePlan = React.createClass({
                 <div>Velocity: {this.state.velocity}</div>
                 <div>Iteration Length: {this.state.iterationLength} Week</div>
                 <ReleaseForm onReleaseSubmit={this.handleReleaseSubmit}></ReleaseForm>
-                <ReleaseList items={this.state.releaseList}></ReleaseList>
+                <ReleaseList releases={this.state.releaseList}></ReleaseList>
             </div>
         );
     }
