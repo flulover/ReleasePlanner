@@ -39,12 +39,6 @@ var ReleaseForm = React.createClass({
     getInitialState: function () {
         return {
             isFormClosed: false,
-            name: '',
-            scope: 0,
-            startDate: Date.parse('1999/09/09'),
-            regressionIterations: 1,
-            buffer: 0.5,
-            wayToCalculateDevelopmentIteration: 'Ceil',
             factList: []
         };
     },
@@ -67,7 +61,6 @@ var ReleaseForm = React.createClass({
 
             factList.push(fact);
         }
-        console.log(factList);
         return factList;
     },
     handleSubmit: function (e) {
@@ -381,7 +374,7 @@ var ReleasePlan = React.createClass({
                 var releaseList = self.calculateReleasePlan(self.state.releaseList.concat(release));
                 self.setState({
                     releaseList: releaseList
-                })
+                });
             }
         );
     },
