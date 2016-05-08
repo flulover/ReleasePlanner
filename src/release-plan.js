@@ -251,12 +251,26 @@ var ReleasePlan = React.createClass({
 
         return map[wayToCalculateDevelopmentIteration];
     },
+    getImpactedPoint: function (release) {
+        var factList = release.get('factList');
+        var impactedPoints = 0;
+        for(var i = 0; i < factList.length; ++i){
+            impactedPoints += parseInt(factList[i].impactedPoints);
+        }
+
+        return impactedPoints
+    },
     calculateReleasePlanForOneRelease: function (release, startDate, mayDelayDay) {
         var wayToCalculateDevelopmentIterationFunc = this.getWayToCalculateDevelopmentIterationFunc(release.get('wayToCalculateDevelopmentIteration'));
-        var developmentIterations = wayToCalculateDevelopmentIterationFunc(release.get('scope') / this.state.velocity);
+        var idealDevelopmentIterations = wayToCalculateDevelopmentIterationFunc(release.get('scope') / this.state.velocity);
         var iterationLengthByDay = this.getIterationLengthByDay();
 
-        var developmentLengthByDay = iterationLengthByDay * developmentIterations;
+        var lastIterationPoints = release.get('scope') - (idealDevelopmentIterations - 1) * this.state.velocity;
+        var impactedPoints = this.getImpactedPoint(release);
+        var tailIterationCount = wayToCalculateDevelopmentIterationFunc((lastIterationPoints + impactedPoints*-1)/this.state.velocity);
+        var actualDevelopmentIterationCount = idealDevelopmentIterations - 1 + tailIterationCount;
+
+        var developmentLengthByDay = iterationLengthByDay * actualDevelopmentIterationCount;
         var regressionIterationByDay = release.get('regressionIterations') * iterationLengthByDay;
 
         var bestReleaseDate = startDate;
@@ -268,7 +282,7 @@ var ReleasePlan = React.createClass({
         worstReleaseDate.setDate(bestReleaseDate.getDate() + mayDelayDay);
         release.set('worstReleaseDate', worstReleaseDate.toDateString());
 
-        release.set('developmentIterations', developmentIterations);
+        release.set('developmentIterations', actualDevelopmentIterationCount);
         return release;
     },
     calculateReleasePlan: function (rawReleaseList) {
