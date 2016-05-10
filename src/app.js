@@ -19774,6 +19774,11 @@ var CreateFactory = {
             type: Constant.SETTING_CHANGE_ITERATION_LENGTH,
             value: iterationLength
         });
+    },
+    loadSetting: function () {
+        Dispatcher.dispatch({
+            type: Constant.SETTING_LOAD
+        });
     }
 };
 
@@ -20150,34 +20155,8 @@ var ReleasePlan = React.createClass({
 
     getInitialState: function () {
         return {
-            developerCount: 0,
-            velocity: 0,
-            iterationLength: 0,
             releaseList: []
         };
-    },
-    componentDidMount: function () {
-        this.loadSettings();
-    },
-    componentDidUpdate: function () {
-        this.saveSettings();
-    },
-    loadSettings: function () {
-        var Settings = AV.Object.extend('Settings');
-        var query = new AV.Query(Settings);
-        var self = this;
-        query.find().then(function (results) {
-            var settings = results[0];
-            self.setState({
-                developerCount: settings.get('developerCount'),
-                velocity: settings.get('velocity'),
-                iterationLength: settings.get('iterationLength')
-            });
-
-            self.loadReleaseList();
-        }, function (error) {
-            console.log('Error: ' + error.code + ' ' + error.message);
-        });
     },
     getIterationLengthByDay: function () {
         return this.state.iterationLength * 7;
@@ -20305,52 +20284,6 @@ var ReleasePlan = React.createClass({
             console.log('Error: ' + error.code + ' ' + error.message);
         });
     },
-    handleSettingsChanged: function (settings) {
-        this.setState(settings);
-    },
-    createNewSettings: function () {
-        var Settings = AV.Object.extend('Settings');
-        var settings = new Settings();
-        settings.set('developerCount', this.state.developerCount);
-        settings.set('velocity', this.state.velocity);
-        settings.set('iterationLength', this.state.iterationLength);
-        settings.save().then(function (settings) {
-            console.log('New object created with objectId: ' + settings.id);
-        }, function (err) {
-            console.log('Failed to create new object, with error message: ' + err.message);
-        });
-    },
-    updateSettings: function (settings) {
-        var Settings = AV.Object.extend('Settings');
-        var query = new AV.Query(Settings);
-        var self = this;
-        query.get(settings.id).then(function (settings) {
-            settings.set('developerCount', self.state.developerCount);
-            settings.set('velocity', self.state.velocity);
-            settings.set('iterationLength', self.state.iterationLength);
-            settings.save().then(function (settings) {
-                console.log('Update object with objectId: ' + settings.id);
-            }, function (err) {
-                console.log('Failed to update object, with error message: ' + err.message);
-            });
-        }, function (error) {
-            console.log('Error: ' + error.code + ' ' + error.message);
-        });
-    },
-    saveSettings: function () {
-        var Settings = AV.Object.extend('Settings');
-        var query = new AV.Query(Settings);
-        var self = this;
-        query.find().then(function (results) {
-            if (results.length == 0) {
-                self.createNewSettings();
-            } else {
-                self.updateSettings(results[0]);
-            }
-        }, function (error) {
-            console.log('Error: ' + error.code + ' ' + error.message);
-        });
-    },
     handleReleaseSubmit: function (release) {
         var Release = AV.Object.extend('Release');
         var release = new Release(release);
@@ -20366,26 +20299,7 @@ var ReleasePlan = React.createClass({
         return React.createElement(
             'div',
             null,
-            React.createElement(Settings, { settingsChanged: this.handleSettingsChanged }),
-            React.createElement(
-                'div',
-                null,
-                'Developer Count: ',
-                this.state.developerCount
-            ),
-            React.createElement(
-                'div',
-                null,
-                'Velocity: ',
-                this.state.velocity
-            ),
-            React.createElement(
-                'div',
-                null,
-                'Iteration Length: ',
-                this.state.iterationLength,
-                ' Week'
-            ),
+            React.createElement(Settings, null),
             React.createElement(ReleaseForm, { onReleaseSubmit: this.handleReleaseSubmit }),
             React.createElement(ReleaseList, { releases: this.state.releaseList })
         );
@@ -20409,7 +20323,6 @@ var Settings = React.createClass({
 
     getInitialState: function () {
         return {
-            isPanelClosed: true,
             developerCount: 0,
             velocity: 0,
             iterationLength: 0
@@ -20417,15 +20330,13 @@ var Settings = React.createClass({
     },
     componentDidMount: function () {
         SettingsStore.addChangeListener(this.onChange);
+        ActionFactory.loadSetting();
     },
     componentWillUnmount: function () {
         SettingsStore.removeChangeListener(this.onChange);
     },
     onChange: function () {
-        this.setState(SettingsStore.getSettings);
-    },
-    toggleSettingPanel: function () {
-        this.setState({ isPanelClosed: !this.state.isPanelClosed });
+        this.setState(SettingsStore.getSettings());
     },
     handleDeveloperCountChanged: function (e) {
         ActionFactory.changeDeveloperCount(parseInt(e.target.value));
@@ -20441,13 +20352,13 @@ var Settings = React.createClass({
             'div',
             null,
             React.createElement(
-                'button',
-                { onClick: this.toggleSettingPanel },
+                'h2',
+                null,
                 'Settings'
             ),
             React.createElement(
                 'form',
-                { hidden: this.state.isPanelClosed },
+                null,
                 React.createElement(
                     'label',
                     null,
@@ -20492,7 +20403,8 @@ module.exports = KeyMirror({
     SETTING_CHANGE_DEVELOPER_COUNT: null,
     SETTING_CHANGE_VELOCITY: null,
     SETTING_CHANGE_ITERATION_LENGTH: null,
-    SETTING_CHANGE: null
+    SETTING_CHANGE: null,
+    SETTING_LOAD: null
 });
 
 },{"keymirror":4}],176:[function(require,module,exports){
@@ -20513,21 +20425,85 @@ var Assign = require('object-assign');
 var EventEmitter = require('events').EventEmitter;
 var Constant = require('../constants/constants');
 
-var SettingsStore = Assign({}, EventEmitter.prototype, {
+var _settings = {
     developerCount: 0,
     velocity: 0,
-    iterationLength: 0,
+    iterationLength: 0
+};
+
+var _loadSettings = function () {
+    var Settings = AV.Object.extend('Settings');
+    var query = new AV.Query(Settings);
+    query.find().then(function (results) {
+        var settings = results[0];
+        _settings.developerCount = settings.get('developerCount'), _settings.velocity = settings.get('velocity'), _settings.iterationLength = settings.get('iterationLength');
+
+        SettingsStore.emitChange();
+    }, function (error) {
+        console.log('Error: ' + error.code + ' ' + error.message);
+    });
+};
+
+function _createNewSettings() {
+    var Settings = AV.Object.extend('Settings');
+    var settings = new Settings();
+    settings.set('developerCount', _settings.developerCount);
+    settings.set('velocity', _settings.velocity);
+    settings.set('iterationLength', _settings.iterationLength);
+    settings.save().then(function (settings) {
+        console.log('New object created with objectId: ' + settings.id);
+    }, function (err) {
+        console.log('Failed to create new object, with error message: ' + err.message);
+    });
+}
+
+function _updateSettings(settings) {
+    var Settings = AV.Object.extend('Settings');
+    var query = new AV.Query(Settings);
+    query.get(settings.id).then(function (settings) {
+        settings.set('developerCount', _settings.developerCount);
+        settings.set('velocity', _settings.velocity);
+        settings.set('iterationLength', _settings.iterationLength);
+        settings.save().then(function (settings) {
+            console.log('Update object with objectId: ' + settings.id);
+        }, function (err) {
+            console.log('Failed to update object, with error message: ' + err.message);
+        });
+    }, function (error) {
+        console.log('Error: ' + error.code + ' ' + error.message);
+    });
+}
+
+function _saveSettings() {
+    var Settings = AV.Object.extend('Settings');
+    var query = new AV.Query(Settings);
+    var self = this;
+    query.find().then(function (results) {
+        if (results.length == 0) {
+            _createNewSettings();
+        } else {
+            _updateSettings(results[0]);
+        }
+    }, function (error) {
+        console.log('Error: ' + error.code + ' ' + error.message);
+    });
+}
+
+var SettingsStore = Assign({}, EventEmitter.prototype, {
     changeDeveloperCount: function (developerCount) {
-        this.developerCount = developerCount;
-        this.emitChange();
+        _settings.developerCount = developerCount;
+        _saveSettings();
+        SettingsStore.emitChange();
     },
     changeVelocity: function (velocity) {
-        this.velocity = velocity;
-        this.emitChange();
+        _settings.velocity = velocity;
+        _saveSettings();
+        SettingsStore.emitChange();
     },
     changeIterationLength: function (iterationLength) {
-        this.iterationLength = iterationLength;
-        this.emitChange();
+        _settings.iterationLength = iterationLength;
+        _saveSettings();
+        SettingsStore.emitChange();
     },
     addChangeListener: function (callback) {
         this.on(Constant.SETTING_CHANGE, callback);
@@ -20539,11 +20515,10 @@ var SettingsStore = Assign({}, EventEmitter.prototype, {
         this.emit(Constant.SETTING_CHANGE);
     },
     getSettings: function () {
-        return {
-            developerCount: this.developerCount,
-            velocity: this.velocity,
-            iterationLength: this.iterationLength
-        };
+        return _settings;
+    },
+    loadSettings() {
+        _loadSettings();
     }
 });
 
@@ -20551,7 +20526,8 @@ Dispatcher.register(function (action) {
     var actionMap = {
         'SETTING_CHANGE_DEVELOPER_COUNT': SettingsStore.changeDeveloperCount,
         'SETTING_CHANGE_VELOCITY': SettingsStore.changeVelocity,
-        'SETTING_CHANGE_ITERATION_LENGTH': SettingsStore.changeIterationLength
+        'SETTING_CHANGE_ITERATION_LENGTH': SettingsStore.changeIterationLength,
+        'SETTING_LOAD': SettingsStore.loadSettings
     };
 
     var mapFunc = actionMap[action.type];

@@ -201,34 +201,8 @@ var ReleaseList = React.createClass({
 var ReleasePlan = React.createClass({
     getInitialState: function () {
         return {
-            developerCount: 0,
-            velocity: 0,
-            iterationLength: 0,
             releaseList: []
         };
-    },
-    componentDidMount: function () {
-        this.loadSettings();
-    },
-    componentDidUpdate: function () {
-        this.saveSettings();
-   },
-    loadSettings: function () {
-        var Settings = AV.Object.extend('Settings');
-        var query = new AV.Query(Settings);
-        var self = this;
-        query.find().then(function(results) {
-            var settings = results[0];
-            self.setState({
-                developerCount: settings.get('developerCount'),
-                velocity: settings.get('velocity'),
-                iterationLength: settings.get('iterationLength')
-            });
-
-            self.loadReleaseList();
-        }, function(error) {
-            console.log('Error: ' + error.code + ' ' + error.message);
-        });
     },
     getIterationLengthByDay: function () {
         return this.state.iterationLength * 7;
@@ -358,53 +332,6 @@ var ReleasePlan = React.createClass({
             console.log('Error: ' + error.code + ' ' + error.message);
         });
     },
-    handleSettingsChanged: function (settings) {
-        this.setState(settings);
-    },
-    createNewSettings: function () {
-        var Settings = AV.Object.extend('Settings');
-        var settings = new Settings();
-        settings.set('developerCount', this.state.developerCount);
-        settings.set('velocity', this.state.velocity);
-        settings.set('iterationLength', this.state.iterationLength);
-        settings.save().then(function (settings) {
-            console.log('New object created with objectId: ' + settings.id);
-        }, function (err) {
-            console.log('Failed to create new object, with error message: ' + err.message);
-        });
-    },
-    updateSettings: function (settings) {
-        var Settings = AV.Object.extend('Settings');
-        var query = new AV.Query(Settings);
-        var self = this;
-        query.get(settings.id).then(function (settings) {
-            settings.set('developerCount', self.state.developerCount);
-            settings.set('velocity', self.state.velocity);
-            settings.set('iterationLength', self.state.iterationLength);
-            settings.save().then(function (settings) {
-                console.log('Update object with objectId: ' + settings.id);
-            }, function (err) {
-                console.log('Failed to update object, with error message: ' + err.message);
-            });
-        }, function (error) {
-            console.log('Error: ' + error.code + ' ' + error.message);
-        });
-    },
-    saveSettings: function () {
-        var Settings = AV.Object.extend('Settings');
-        var query = new AV.Query(Settings);
-        var self = this;
-        query.find().then(function(results) {
-            if (results.length == 0){
-                self.createNewSettings();
-            }
-            else {
-                self.updateSettings(results[0]);
-            }
-        }, function(error) {
-            console.log('Error: ' + error.code + ' ' + error.message);
-        });
-    },
     handleReleaseSubmit: function (release) {
         var Release = AV.Object.extend('Release');
         var release = new Release(release);
@@ -421,10 +348,7 @@ var ReleasePlan = React.createClass({
     render: function () {
         return (
             <div>
-                <Settings settingsChanged={this.handleSettingsChanged}></Settings>
-                <div>Developer Count: {this.state.developerCount}</div>
-                <div>Velocity: {this.state.velocity}</div>
-                <div>Iteration Length: {this.state.iterationLength} Week</div>
+                <Settings></Settings>
                 <ReleaseForm onReleaseSubmit={this.handleReleaseSubmit}></ReleaseForm>
                 <ReleaseList releases={this.state.releaseList}></ReleaseList>
             </div>

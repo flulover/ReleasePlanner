@@ -10,7 +10,6 @@ var SettingsStore = require('../stores/SettingsStore');
 var Settings = React.createClass({
     getInitialState: function () {
         return {
-            isPanelClosed: true,
             developerCount: 0,
             velocity: 0,
             iterationLength: 0,
@@ -18,15 +17,13 @@ var Settings = React.createClass({
     },
     componentDidMount: function () {
         SettingsStore.addChangeListener(this.onChange);
+        ActionFactory.loadSetting();
     },
     componentWillUnmount: function () {
         SettingsStore.removeChangeListener(this.onChange);
     },
     onChange: function () {
-        this.setState(SettingsStore.getSettings);
-    },
-    toggleSettingPanel: function () {
-        this.setState({isPanelClosed: !this.state.isPanelClosed});
+        this.setState(SettingsStore.getSettings());
     },
     handleDeveloperCountChanged: function (e) {
         ActionFactory.changeDeveloperCount(parseInt(e.target.value));
@@ -40,8 +37,8 @@ var Settings = React.createClass({
     render: function () {
         return (
             <div>
-                <button onClick={this.toggleSettingPanel}>Settings</button>
-                <form hidden={this.state.isPanelClosed}>
+                <h2>Settings</h2>
+                <form>
                     <label>Developer Count: <input type="number" value={this.state.developerCount} onChange={this.handleDeveloperCountChanged}/></label><br/>
                     <label>Velocity: <input type="number" value={this.state.velocity} onChange={this.handleVelocityChanged}/></label><br/>
                     <label>Iteration Length: <input type="number" value={this.state.iterationLength} onChange={this.handleIterationLengthChanged}/><span>&nbsp;Week</span></label><br/>
