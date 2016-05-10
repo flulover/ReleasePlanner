@@ -4,38 +4,10 @@
  */
 var React = require('react');
 var ReactDOM = require('react-dom');
+var ActionFactory = require('../actions/ActionFactory');
+var SettingsStore = require('../stores/SettingsStore');
+var Settings = require('../components/settings');
 
-var Settings = React.createClass({
-    getInitialState: function () {
-        return {
-            isPanelClosed: true
-        };
-    },
-    toggleSettingPanel: function () {
-        this.setState({isPanelClosed: !this.state.isPanelClosed});
-    },
-    handleDeveloperCountChanged: function (e) {
-        this.props.settingsChanged({developerCount: parseInt(e.target.value)});
-    },
-    handleVelocityChanged: function (e) {
-        this.props.settingsChanged({velocity: parseInt(e.target.value)});
-    },
-    handleIterationLengthChanged: function (e) {
-        this.props.settingsChanged({iterationLength: parseInt(e.target.value)});
-    },
-    render: function () {
-        return (
-            <div>
-                <button onClick={this.toggleSettingPanel}>Settings</button>
-                <form hidden={this.state.isPanelClosed}>
-                    <label>Developer Count: <input type="number" onChange={this.handleDeveloperCountChanged}/></label><br/>
-                    <label>Velocity: <input type="number" onChange={this.handleVelocityChanged}/></label><br/>
-                    <label>Iteration Length: <input type="number" onChange={this.handleIterationLengthChanged}/><span>&nbsp;Week</span></label><br/>
-                </form>
-            </div>
-        );
-    }
-});
 
 var ReleaseForm = React.createClass({
     getInitialState: function () {
