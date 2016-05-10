@@ -2,6 +2,8 @@
  *
  * Created by yzzhou on 5/5/16.
  */
+var React = require('react');
+var ReactDOM = require('react-dom');
 
 var Settings = React.createClass({
     getInitialState: function () {
