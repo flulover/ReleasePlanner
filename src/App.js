@@ -20408,8 +20408,7 @@ module.exports = KeyMirror({
     SETTING_CHANGE_DEVELOPER_COUNT: null,
     SETTING_CHANGE_VELOCITY: null,
     SETTING_CHANGE_ITERATION_LENGTH: null,
-    SETTING_CHANGE: null,
-    SETTING_LOAD: null
+    SETTING_CHANGE: null
 });
 
 },{"keymirror":4}],177:[function(require,module,exports){

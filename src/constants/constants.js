@@ -9,5 +9,4 @@ module.exports = KeyMirror({
     SETTING_CHANGE_VELOCITY: null,
     SETTING_CHANGE_ITERATION_LENGTH: null,
     SETTING_CHANGE: null,
-    SETTING_LOAD: null,
 });
