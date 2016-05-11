@@ -16,7 +16,7 @@
   "devDependencies": {},
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "build": "browserify -t [ babelify --presets [ react ] ] src/components/releasePlan.js -o src/app.js"
+    "build": "browserify -t [ babelify --presets [ react ] ] src/components/ReleasePlan.js -o src/App.js"
   },
   "repository": {
     "type": "git",

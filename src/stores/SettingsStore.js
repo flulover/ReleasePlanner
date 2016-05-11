@@ -6,6 +6,7 @@ var Dispatcher = require('../dispatcher/dispatcher');
 var Assign = require('object-assign');
 var EventEmitter = require('events').EventEmitter;
 var Constant = require('../constants/constants');
+var ReleasePlanStore = require('./ReleasePlanStore');
 
 var _settings = {
     developerCount: 0,
@@ -23,6 +24,7 @@ var _loadSettings = function () {
         _settings.iterationLength = settings.get('iterationLength')
 
         SettingsStore.emitChange();
+
     }, function(error) {
         console.log('Error: ' + error.code + ' ' + error.message);
     });

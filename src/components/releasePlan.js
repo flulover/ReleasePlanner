@@ -6,8 +6,8 @@ var React = require('react');
 var ReactDOM = require('react-dom');
 var ActionFactory = require('../actions/ActionFactory');
 var SettingsStore = require('../stores/SettingsStore');
-var Settings = require('../components/settings');
-var ReleaseForm = require('../components/releaseForm');
+var Settings = require('./Settings');
+var ReleaseForm = require('./ReleaseForm');
 
 var ReleaseList = React.createClass({
     createNoteNode: function (factList) {
