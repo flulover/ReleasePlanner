@@ -10,9 +10,9 @@ var SettingsStore = require('../stores/SettingsStore');
 var Settings = React.createClass({
     getInitialState: function () {
         return {
-            developerCount: undefined,
-            velocity: undefined,
-            iterationLength: undefined,
+            developerCount: 0,
+            velocity: 0,
+            iterationLength: 0,
         };
     },
     componentDidMount: function () {
