@@ -22,7 +22,7 @@ function _getVelocity() {
 }
 
 function _getIterationLengthByDay() {
-    return _getIterationLength * 7;
+    return _getIterationLength() * 7;
 }
 
 function _getWayToCalculateDevelopmentIterationFunc(wayToCalculateDevelopmentIteration) {
@@ -92,6 +92,7 @@ function _calculateReleasePlanForOneRelease(release, startDate, mayDelayDay) {
     var iterationLengthByDay = _getIterationLengthByDay();
     var lastIterationPoints = release.get('scope') - (idealDevelopmentIterations - 1) * velocity;
     var impactedPoints = _getImpactedPoint(release);
+
     var tailIterationCount = wayToCalculateDevelopmentIterationFunc((lastIterationPoints + impactedPoints*-1) / velocity);
     var actualDevelopmentIterationCount = idealDevelopmentIterations - 1 + tailIterationCount;
     release.set('developmentIterations', actualDevelopmentIterationCount);
@@ -115,7 +116,6 @@ function _calculateReleasePlan(rawReleaseList) {
     var firstRelease = rawReleaseList[0];
     var firstStartDate = _adjustStartDate(new Date(firstRelease.get('startDate')));
     var bufferByDay = firstRelease.get('buffer') * _getIterationLengthByDay();
-
     var releaseList = [];
     releaseList.push(_calculateReleasePlanForOneRelease(firstRelease, firstStartDate, bufferByDay));
 
@@ -142,21 +142,50 @@ function _adjustStartDate(date) {
     return adjustStartDate;
 }
 
-var ReleasePlanStore = {
+function _addReleasePlan(release) {
+    _releasePlanList.push(release);
+    ReleasePlanStore.emitChange();
+}
+
+var ReleasePlanStore = Assign({}, EventEmitter.prototype, {
     loadReleasePlans: function () {
         var Release = AV.Object.extend('Release');
         var query = new AV.Query(Release);
-        var self = this;
         query.find().then(function(results) {
             if (results.length == 0){
                 return;
             }
             _releasePlanList = results;
-            var releaseList = _calculateReleasePlan(_releasePlanList);
+            ReleasePlanStore.emitChange();
         }, function(error) {
             console.log('Error: ' + error.code + ' ' + error.message);
         });
     },
-};
+    getReleaseList: function () {
+        var releasePlanList = _calculateReleasePlan(_releasePlanList)
+        return releasePlanList;
+    },
+    addChangeListener: function (callback) {
+        this.on(Constant.RELEASE_PLAN_CHANGE, callback);
+    },
+    removeChangeListener: function (callback) {
+        this.removeListener(Constant.RELEASE_PLAN_CHANGE, callback);
+    },
+    emitChange: function () {
+        this.emit(Constant.RELEASE_PLAN_CHANGE);
+    }
+});
+
+Dispatcher.register(function (action) {
+    var actionMap = {
+        'RELEASE_PLAN_LOAD': ReleasePlanStore.loadReleasePlans,
+        'RELEASE_PLAN_ADD': _addReleasePlan,
+    };
+
+    var mapFunc = actionMap[action.type];
+    if (mapFunc){
+        mapFunc(action.value);
+    }
+});
 
 module.exports = ReleasePlanStore;

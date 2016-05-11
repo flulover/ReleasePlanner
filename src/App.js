@@ -19774,6 +19774,17 @@ var CreateFactory = {
             type: Constant.SETTING_CHANGE_ITERATION_LENGTH,
             value: iterationLength
         });
+    },
+    loadReleasePlans: function () {
+        Dispatcher.dispatch({
+            type: Constant.RELEASE_PLAN_LOAD
+        });
+    },
+    addReleasePlan: function (release) {
+        Dispatcher.dispatch({
+            type: Constant.RELEASE_PLAN_ADD,
+            value: release
+        });
     }
 };
 
@@ -20018,10 +20029,11 @@ module.exports = ReleaseForm;
  */
 var React = require('react');
 var ReactDOM = require('react-dom');
-var ActionFactory = require('../actions/ActionFactory');
-var SettingsStore = require('../stores/SettingsStore');
+var ReleasePlanStore = require('../stores/ReleasePlanStore');
+
 var Settings = require('./Settings');
 var ReleaseForm = require('./ReleaseForm');
+var ActionFactory = require('../actions/ActionFactory');
 
 var ReleaseList = React.createClass({
     displayName: 'ReleaseList',
@@ -20161,144 +20173,23 @@ var ReleasePlan = React.createClass({
 
     getInitialState: function () {
         return {
-            releaseList: []
+            releasePlanList: []
         };
     },
-    getIterationLengthByDay: function () {
-        return this.state.iterationLength * 7;
+    componentDidMount: function () {
+        ReleasePlanStore.addChangeListener(this.onChange);
     },
-    getWayToCalculateDevelopmentIterationFunc: function (wayToCalculateDevelopmentIteration) {
-        if (wayToCalculateDevelopmentIteration === '' || wayToCalculateDevelopmentIteration === undefined) {
-            return Math.ceil;
-        }
-
-        var justReturn = function (iterationLength) {
-            return iterationLength;
-        };
-
-        var roundToHalf = function (iterationLength) {
-            var integerPart = Math.floor(iterationLength);
-            return integerPart + 0.5;
-        };
-
-        var map = {
-            Ceil: Math.ceil,
-            RoundToHalf: roundToHalf,
-            Actually: justReturn
-        };
-
-        return map[wayToCalculateDevelopmentIteration];
+    componentWillUnmount: function () {
+        ReleasePlanStore.removeChangeListener(this.onChange);
     },
-    getVelocityForOneDay: function () {
-        var workDayForeachIteration = this.getIterationLengthByDay() * 5 / 7;
-        var velocityForOneDay = this.state.velocity / workDayForeachIteration;
-        return velocityForOneDay;
-    },
-    getDiffDays: function (startDate, endDate) {
-        var oneDay = 24 * 60 * 60 * 1000;
-        return Math.round(Math.abs((endDate.getTime() - startDate.getTime()) / oneDay));
-    },
-    getImpactedPoint: function (release) {
-        var factList = release.get('factList');
-        var impactedPoints = 0;
-        for (var i = 0; i < factList.length; ++i) {
-            var fact = factList[i];
-            if (fact.type === 'other') {
-                impactedPoints += parseInt(factList[i].impactedPoints);
-            } else if (fact.type === 'publicHoliday') {
-                if (parseInt(fact.customImpactedPoints)) {
-                    fact.impactedPoints = parseInt(fact.customImpactedPoints);
-                    impactedPoints += fact.impactedPoints;
-                } else {
-                    var velocityForOneDay = this.getVelocityForOneDay();
-                    var diffDays = this.getDiffDays(new Date(fact['startDate']), new Date(fact['endDate']));
-                    fact.impactedPoints = Math.ceil(diffDays * velocityForOneDay);
-                    impactedPoints += fact.impactedPoints;
-                }
-            }
-        }
-
-        return impactedPoints;
-    },
-    calculateReleasePlanForOneRelease: function (release, startDate, mayDelayDay) {
-        var wayToCalculateDevelopmentIterationFunc = this.getWayToCalculateDevelopmentIterationFunc(release.get('wayToCalculateDevelopmentIteration'));
-        var idealDevelopmentIterations = wayToCalculateDevelopmentIterationFunc(release.get('scope') / this.state.velocity);
-        var iterationLengthByDay = this.getIterationLengthByDay();
-        var lastIterationPoints = release.get('scope') - (idealDevelopmentIterations - 1) * this.state.velocity;
-        var impactedPoints = this.getImpactedPoint(release);
-        var tailIterationCount = wayToCalculateDevelopmentIterationFunc((lastIterationPoints + impactedPoints * -1) / this.state.velocity);
-        var actualDevelopmentIterationCount = idealDevelopmentIterations - 1 + tailIterationCount;
-        release.set('developmentIterations', actualDevelopmentIterationCount);
-
-        var developmentLengthByDay = iterationLengthByDay * actualDevelopmentIterationCount;
-        var regressionIterationByDay = release.get('regressionIterations') * iterationLengthByDay;
-
-        var bestReleaseDate = startDate;
-
-        bestReleaseDate.setDate(bestReleaseDate.getDate() + developmentLengthByDay + regressionIterationByDay);
-        release.set('bestReleaseDate', bestReleaseDate.toDateString());
-
-        var worstReleaseDate = bestReleaseDate;
-        worstReleaseDate.setDate(bestReleaseDate.getDate() + mayDelayDay);
-        release.set('worstReleaseDate', worstReleaseDate.toDateString());
-
-        return release;
-    },
-    calculateReleasePlan: function (rawReleaseList) {
-        var firstRelease = rawReleaseList[0];
-        var firstStartDate = this.adjustStartDate(new Date(firstRelease.get('startDate')));
-        var bufferByDay = firstRelease.get('buffer') * this.getIterationLengthByDay();
-
-        var releaseList = [];
-        releaseList.push(this.calculateReleasePlanForOneRelease(firstRelease, firstStartDate, bufferByDay));
-
-        for (var i = 1; i < rawReleaseList.length; ++i) {
-            var release = rawReleaseList[i];
-            var lastReleaseDate = new Date(releaseList[i - 1].get('bestReleaseDate'));
-            var startDate = lastReleaseDate;
-            startDate.setDate(lastReleaseDate.getDate() + 1);
-            startDate = this.adjustStartDate(startDate);
-
-            var mayDelayDay = 0;
-            for (var j = 0; j < rawReleaseList.length; ++j) {
-                mayDelayDay += rawReleaseList[j].get('buffer') * this.getIterationLengthByDay();
-            }
-            releaseList.push(this.calculateReleasePlanForOneRelease(release, startDate, mayDelayDay));
-        }
-        return releaseList;
-    },
-    adjustStartDate: function (date) {
-        var adjustStartDate = new Date(date);
-        var weekdaySequence = date.getDay();
-        adjustStartDate.setDate(date.getDate() + 4 - weekdaySequence);
-        return adjustStartDate;
-    },
-    loadReleaseList: function () {
-        var Release = AV.Object.extend('Release');
-        var query = new AV.Query(Release);
-        var self = this;
-        query.find().then(function (results) {
-            if (results.length == 0) {
-                return;
-            }
-
-            var releaseList = self.calculateReleasePlan(results);
-            self.setState({
-                releaseList: releaseList
-            });
-        }, function (error) {
-            console.log('Error: ' + error.code + ' ' + error.message);
-        });
+    onChange: function () {
+        this.setState({ releasePlanList: ReleasePlanStore.getReleaseList() });
     },
     handleReleaseSubmit: function (release) {
         var Release = AV.Object.extend('Release');
         var release = new Release(release);
-        var self = this;
         release.save().then(function (release) {
-            var releaseList = self.calculateReleasePlan(self.state.releaseList.concat(release));
-            self.setState({
-                releaseList: releaseList
-            });
+            ActionFactory.addReleasePlan(release);
         });
     },
     render: function () {
@@ -20307,14 +20198,14 @@ var ReleasePlan = React.createClass({
             null,
             React.createElement(Settings, null),
             React.createElement(ReleaseForm, { onReleaseSubmit: this.handleReleaseSubmit }),
-            React.createElement(ReleaseList, { releases: this.state.releaseList })
+            React.createElement(ReleaseList, { releases: this.state.releasePlanList })
         );
     }
 });
 
 ReactDOM.render(React.createElement(ReleasePlan, null), document.getElementById('releasePlan'));
 
-},{"../actions/ActionFactory":172,"../stores/SettingsStore":179,"./ReleaseForm":173,"./Settings":175,"react":171,"react-dom":6}],175:[function(require,module,exports){
+},{"../actions/ActionFactory":172,"../stores/ReleasePlanStore":178,"./ReleaseForm":173,"./Settings":175,"react":171,"react-dom":6}],175:[function(require,module,exports){
 /**
  *
  * Created by yzzhou on 5/11/16.
@@ -20408,7 +20299,11 @@ module.exports = KeyMirror({
     SETTING_CHANGE_DEVELOPER_COUNT: null,
     SETTING_CHANGE_VELOCITY: null,
     SETTING_CHANGE_ITERATION_LENGTH: null,
-    SETTING_CHANGE: null
+    SETTING_CHANGE: null,
+
+    RELEASE_PLAN_LOAD: null,
+    RELEASE_PLAN_CHANGE: null,
+    RELEASE_PLAN_ADD: null
 });
 
 },{"keymirror":4}],177:[function(require,module,exports){
@@ -20444,7 +20339,7 @@ function _getVelocity() {
 }
 
 function _getIterationLengthByDay() {
-    return _getIterationLength * 7;
+    return _getIterationLength() * 7;
 }
 
 function _getWayToCalculateDevelopmentIterationFunc(wayToCalculateDevelopmentIteration) {
@@ -20513,6 +20408,7 @@ function _calculateReleasePlanForOneRelease(release, startDate, mayDelayDay) {
     var iterationLengthByDay = _getIterationLengthByDay();
     var lastIterationPoints = release.get('scope') - (idealDevelopmentIterations - 1) * velocity;
     var impactedPoints = _getImpactedPoint(release);
+
     var tailIterationCount = wayToCalculateDevelopmentIterationFunc((lastIterationPoints + impactedPoints * -1) / velocity);
     var actualDevelopmentIterationCount = idealDevelopmentIterations - 1 + tailIterationCount;
     release.set('developmentIterations', actualDevelopmentIterationCount);
@@ -20536,7 +20432,6 @@ function _calculateReleasePlan(rawReleaseList) {
     var firstRelease = rawReleaseList[0];
     var firstStartDate = _adjustStartDate(new Date(firstRelease.get('startDate')));
     var bufferByDay = firstRelease.get('buffer') * _getIterationLengthByDay();
-
     var releaseList = [];
     releaseList.push(_calculateReleasePlanForOneRelease(firstRelease, firstStartDate, bufferByDay));
 
@@ -20563,22 +20458,51 @@ function _adjustStartDate(date) {
     return adjustStartDate;
 }
 
-var ReleasePlanStore = {
+function _addReleasePlan(release) {
+    _releasePlanList.push(release);
+    ReleasePlanStore.emitChange();
+}
+
+var ReleasePlanStore = Assign({}, EventEmitter.prototype, {
     loadReleasePlans: function () {
         var Release = AV.Object.extend('Release');
         var query = new AV.Query(Release);
-        var self = this;
         query.find().then(function (results) {
             if (results.length == 0) {
                 return;
             }
             _releasePlanList = results;
-            var releaseList = _calculateReleasePlan(_releasePlanList);
+            ReleasePlanStore.emitChange();
         }, function (error) {
             console.log('Error: ' + error.code + ' ' + error.message);
         });
+    },
+    getReleaseList: function () {
+        var releasePlanList = _calculateReleasePlan(_releasePlanList);
+        return releasePlanList;
+    },
+    addChangeListener: function (callback) {
+        this.on(Constant.RELEASE_PLAN_CHANGE, callback);
+    },
+    removeChangeListener: function (callback) {
+        this.removeListener(Constant.RELEASE_PLAN_CHANGE, callback);
+    },
+    emitChange: function () {
+        this.emit(Constant.RELEASE_PLAN_CHANGE);
     }
-};
+});
+
+Dispatcher.register(function (action) {
+    var actionMap = {
+        'RELEASE_PLAN_LOAD': ReleasePlanStore.loadReleasePlans,
+        'RELEASE_PLAN_ADD': _addReleasePlan
+    };
+
+    var mapFunc = actionMap[action.type];
+    if (mapFunc) {
+        mapFunc(action.value);
+    }
+});
 
 module.exports = ReleasePlanStore;
 
@@ -20591,7 +20515,7 @@ var Dispatcher = require('../dispatcher/dispatcher');
 var Assign = require('object-assign');
 var EventEmitter = require('events').EventEmitter;
 var Constant = require('../constants/constants');
-var ReleasePlanStore = require('./ReleasePlanStore');
+var ActionFactory = require('../actions/ActionFactory');
 
 var _settings = {
     developerCount: 0,
@@ -20607,7 +20531,7 @@ var _loadSettings = function () {
         _settings.developerCount = settings.get('developerCount'), _settings.velocity = settings.get('velocity'), _settings.iterationLength = settings.get('iterationLength');
 
         SettingsStore.emitChange();
-        ReleasePlanStore.loadReleasePlans();
+        ActionFactory.loadReleasePlans();
     }, function (error) {
         console.log('Error: ' + error.code + ' ' + error.message);
     });
@@ -20704,7 +20628,7 @@ Dispatcher.register(function (action) {
 
 module.exports = SettingsStore;
 
-},{"../constants/constants":176,"../dispatcher/dispatcher":177,"./ReleasePlanStore":178,"events":180,"object-assign":5}],180:[function(require,module,exports){
+},{"../actions/ActionFactory":172,"../constants/constants":176,"../dispatcher/dispatcher":177,"events":180,"object-assign":5}],180:[function(require,module,exports){
 // Copyright Joyent, Inc. and other Node contributors.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a

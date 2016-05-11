@@ -24,6 +24,17 @@ var CreateFactory = {
             value: iterationLength
         });
     },
+    loadReleasePlans: function () {
+        Dispatcher.dispatch( {
+            type: Constant.RELEASE_PLAN_LOAD
+        });
+    },
+    addReleasePlan: function (release) {
+        Dispatcher.dispatch( {
+            type: Constant.RELEASE_PLAN_ADD,
+            value: release
+        });
+    }
 };
 
 module.exports = CreateFactory;
