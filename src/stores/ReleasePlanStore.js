@@ -6,28 +6,27 @@
 var Dispatcher = require('../dispatcher/dispatcher');
 var Assign = require('object-assign');
 var EventEmitter = require('events').EventEmitter;
+var Util = require('../util/util');
 var Constant = require('../constants/constants');
 var SettingsStore = require('./SettingsStore');
 
-var _releasePlanList = [];
+var _rawReleasePlanList = [];
 
 function _getIterationLength(){
-    var settings = SettingsStore.getSettings();
-    return settings.iterationLength;
+    return SettingsStore.getSettings().iterationLength;
 }
 
 function _getVelocity() {
-    var settings = SettingsStore.getSettings();
-    return settings.velocity;
+    return SettingsStore.getSettings().velocity;
 }
 
-function _getIterationLengthByDay() {
+function _getDaysInOneIteration() {
     return _getIterationLength() * 7;
 }
 
-function _getWayToCalculateDevelopmentIterationFunc(wayToCalculateDevelopmentIteration) {
-    if (wayToCalculateDevelopmentIteration === ''
-        || wayToCalculateDevelopmentIteration === undefined) {
+function _getAdjustFunc(adjustWay) {
+    if (adjustWay === ''
+        || adjustWay === undefined) {
         return Math.ceil;
     }
 
@@ -46,20 +45,12 @@ function _getWayToCalculateDevelopmentIterationFunc(wayToCalculateDevelopmentIte
         Actually: justReturn
     };
 
-    return map[wayToCalculateDevelopmentIteration];
+    return map[adjustWay];
 }
 
 function _getVelocityForOneDay() {
-    var workDayForeachIteration = _getIterationLengthByDay()*5/7;
-
-    var settings = SettingsStore.getSettings();
-    var velocityForOneDay = settings.velocity / workDayForeachIteration;
-    return velocityForOneDay;
-}
-
-function _getDiffDays(startDate, endDate) {
-    var oneDay = 24*60*60*1000;
-    return Math.round(Math.abs((endDate.getTime() - startDate.getTime())/(oneDay)));
+    var workDayInOneIteration = _getDaysInOneIteration()*5/7;
+    return _getVelocity() / workDayInOneIteration;
 }
 
 function _getImpactedPoint(release) {
@@ -75,7 +66,7 @@ function _getImpactedPoint(release) {
                 impactedPoints += fact.impactedPoints;
             }else{
                 var velocityForOneDay = _getVelocityForOneDay();
-                var diffDays = _getDiffDays(new Date(fact['startDate']), new Date(fact['endDate']));
+                var diffDays = Util.getDiffDays(new Date(fact['startDate']), new Date(fact['endDate']));
                 fact.impactedPoints = Math.ceil(diffDays * velocityForOneDay);
                 impactedPoints += fact.impactedPoints;
             }
@@ -85,28 +76,30 @@ function _getImpactedPoint(release) {
     return impactedPoints
 }
 
-function _calculateReleasePlanForOneRelease(release, startDate, mayDelayDay) {
+function _calculateDevelopmentIterationCount(release){
     var velocity = _getVelocity();
-    var wayToCalculateDevelopmentIterationFunc = _getWayToCalculateDevelopmentIterationFunc(release.get('wayToCalculateDevelopmentIteration'));
-    var idealDevelopmentIterations = wayToCalculateDevelopmentIterationFunc(release.get('scope') / velocity);
-    var iterationLengthByDay = _getIterationLengthByDay();
+    var adjustFunc = _getAdjustFunc(release.get('wayToCalculateDevelopmentIteration'));
+    var idealDevelopmentIterations = adjustFunc(release.get('scope') / velocity);
     var lastIterationPoints = release.get('scope') - (idealDevelopmentIterations - 1) * velocity;
     var impactedPoints = _getImpactedPoint(release);
 
-    var tailIterationCount = wayToCalculateDevelopmentIterationFunc((lastIterationPoints + impactedPoints*-1) / velocity);
-    var actualDevelopmentIterationCount = idealDevelopmentIterations - 1 + tailIterationCount;
-    release.set('developmentIterations', actualDevelopmentIterationCount);
+    var tailIterationCount = adjustFunc((lastIterationPoints + impactedPoints*-1) / velocity);
+    return idealDevelopmentIterations - 1 + tailIterationCount;
+}
 
-    var developmentLengthByDay = iterationLengthByDay * actualDevelopmentIterationCount;
-    var regressionIterationByDay = release.get('regressionIterations') * iterationLengthByDay;
+function _calculateReleasePlanForOneRelease(release, startDate, delayedDays) {
+    var developmentIterationCount = _calculateDevelopmentIterationCount(release);
+    release.set('developmentIterations', developmentIterationCount);
 
+    var daysInOneIteration = _getDaysInOneIteration();
+    var daysInThisRelease = daysInOneIteration * developmentIterationCount;
+    var daysInRegressionTest = release.get('regressionIterations') * daysInOneIteration;
     var bestReleaseDate = startDate;
-
-    bestReleaseDate.setDate(bestReleaseDate.getDate() + developmentLengthByDay + regressionIterationByDay);
+    bestReleaseDate.setDate(bestReleaseDate.getDate() + daysInThisRelease + daysInRegressionTest);
     release.set('bestReleaseDate', bestReleaseDate.toDateString());
 
     var worstReleaseDate = bestReleaseDate;
-    worstReleaseDate.setDate(bestReleaseDate.getDate() + mayDelayDay);
+    worstReleaseDate.setDate(bestReleaseDate.getDate() + delayedDays);
     release.set('worstReleaseDate', worstReleaseDate.toDateString());
 
     return release;
@@ -115,7 +108,7 @@ function _calculateReleasePlanForOneRelease(release, startDate, mayDelayDay) {
 function _calculateReleasePlan(rawReleaseList) {
     var firstRelease = rawReleaseList[0];
     var firstStartDate = _adjustStartDate(new Date(firstRelease.get('startDate')));
-    var bufferByDay = firstRelease.get('buffer') * _getIterationLengthByDay();
+    var bufferByDay = firstRelease.get('buffer') * _getDaysInOneIteration();
     var releaseList = [];
     releaseList.push(_calculateReleasePlanForOneRelease(firstRelease, firstStartDate, bufferByDay));
 
@@ -128,7 +121,7 @@ function _calculateReleasePlan(rawReleaseList) {
 
         var mayDelayDay = 0;
         for (var j = 0; j < rawReleaseList.length; ++j){
-            mayDelayDay += rawReleaseList[j].get('buffer') * _getIterationLengthByDay();
+            mayDelayDay += rawReleaseList[j].get('buffer') * _getDaysInOneIteration();
         }
         releaseList.push(_calculateReleasePlanForOneRelease(release, startDate, mayDelayDay));
     }
@@ -143,7 +136,7 @@ function _adjustStartDate(date) {
 }
 
 function _addReleasePlan(release) {
-    _releasePlanList.push(release);
+    _rawReleasePlanList.push(release);
     ReleasePlanStore.emitChange();
 }
 
@@ -155,15 +148,14 @@ var ReleasePlanStore = Assign({}, EventEmitter.prototype, {
             if (results.length == 0){
                 return;
             }
-            _releasePlanList = results;
+            _rawReleasePlanList = results;
             ReleasePlanStore.emitChange();
         }, function(error) {
             console.log('Error: ' + error.code + ' ' + error.message);
         });
     },
     getReleaseList: function () {
-        var releasePlanList = _calculateReleasePlan(_releasePlanList)
-        return releasePlanList;
+        return _calculateReleasePlan(_rawReleasePlanList);
     },
     addChangeListener: function (callback) {
         this.on(Constant.RELEASE_PLAN_CHANGE, callback);
