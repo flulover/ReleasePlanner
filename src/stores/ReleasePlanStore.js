@@ -11,5 +11,9 @@ var Constant = require('../constants/constants');
 var _releasePLanList = [];
 
 var ReleasePlanStore = {
-    
+    loadReleasePlans: function () {
+        
+    },
 };
+
+module.exports = ReleasePlanStore;

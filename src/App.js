@@ -19774,11 +19774,6 @@ var CreateFactory = {
             type: Constant.SETTING_CHANGE_ITERATION_LENGTH,
             value: iterationLength
         });
-    },
-    loadSetting: function () {
-        Dispatcher.dispatch({
-            type: Constant.SETTING_LOAD
-        });
     }
 };
 
@@ -20341,7 +20336,6 @@ var Settings = React.createClass({
     },
     componentDidMount: function () {
         SettingsStore.addChangeListener(this.onChange);
-        ActionFactory.loadSetting();
     },
     componentWillUnmount: function () {
         SettingsStore.removeChangeListener(this.onChange);
@@ -20439,7 +20433,11 @@ var Constant = require('../constants/constants');
 
 var _releasePLanList = [];
 
-var ReleasePlanStore = {};
+var ReleasePlanStore = {
+    loadReleasePlans: function () {}
+};
+
+module.exports = ReleasePlanStore;
 
 },{"../constants/constants":176,"../dispatcher/dispatcher":177,"events":180,"object-assign":5}],179:[function(require,module,exports){
 /**
@@ -20466,10 +20464,13 @@ var _loadSettings = function () {
         _settings.developerCount = settings.get('developerCount'), _settings.velocity = settings.get('velocity'), _settings.iterationLength = settings.get('iterationLength');
 
         SettingsStore.emitChange();
+        ReleasePlanStore.loadReleasePlans();
     }, function (error) {
         console.log('Error: ' + error.code + ' ' + error.message);
     });
 };
+
+_loadSettings();
 
 function _createNewSettings() {
     var Settings = AV.Object.extend('Settings');
@@ -20504,7 +20505,6 @@ function _updateSettings(settings) {
 function _saveSettings() {
     var Settings = AV.Object.extend('Settings');
     var query = new AV.Query(Settings);
-    var self = this;
     query.find().then(function (results) {
         if (results.length == 0) {
             _createNewSettings();
@@ -20543,9 +20543,6 @@ var SettingsStore = Assign({}, EventEmitter.prototype, {
     },
     getSettings: function () {
         return _settings;
-    },
-    loadSettings() {
-        _loadSettings();
     }
 });
 
@@ -20553,8 +20550,7 @@ Dispatcher.register(function (action) {
     var actionMap = {
         'SETTING_CHANGE_DEVELOPER_COUNT': SettingsStore.changeDeveloperCount,
         'SETTING_CHANGE_VELOCITY': SettingsStore.changeVelocity,
-        'SETTING_CHANGE_ITERATION_LENGTH': SettingsStore.changeIterationLength,
-        'SETTING_LOAD': SettingsStore.loadSettings
+        'SETTING_CHANGE_ITERATION_LENGTH': SettingsStore.changeIterationLength
     };
 
     var mapFunc = actionMap[action.type];

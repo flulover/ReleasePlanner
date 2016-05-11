@@ -24,11 +24,14 @@ var _loadSettings = function () {
         _settings.iterationLength = settings.get('iterationLength')
 
         SettingsStore.emitChange();
+        ReleasePlanStore.loadReleasePlans();
 
     }, function(error) {
         console.log('Error: ' + error.code + ' ' + error.message);
     });
 };
+
+_loadSettings();
 
 function _createNewSettings () {
     var Settings = AV.Object.extend('Settings');
@@ -63,7 +66,6 @@ function _updateSettings(settings) {
 function _saveSettings() {
     var Settings = AV.Object.extend('Settings');
     var query = new AV.Query(Settings);
-    var self = this;
     query.find().then(function(results) {
         if (results.length == 0){
             _createNewSettings();
@@ -104,9 +106,6 @@ var SettingsStore = Assign({}, EventEmitter.prototype, {
     getSettings: function () {
         return _settings;
     },
-    loadSettings(){
-        _loadSettings();
-    }
 });
 
 Dispatcher.register(function (action) {
@@ -114,7 +113,6 @@ Dispatcher.register(function (action) {
         'SETTING_CHANGE_DEVELOPER_COUNT': SettingsStore.changeDeveloperCount,
         'SETTING_CHANGE_VELOCITY': SettingsStore.changeVelocity,
         'SETTING_CHANGE_ITERATION_LENGTH': SettingsStore.changeIterationLength,
-        'SETTING_LOAD': SettingsStore.loadSettings,
     };
 
     var mapFunc = actionMap[action.type];

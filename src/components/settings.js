@@ -17,7 +17,6 @@ var Settings = React.createClass({
     },
     componentDidMount: function () {
         SettingsStore.addChangeListener(this.onChange);
-        ActionFactory.loadSetting();
     },
     componentWillUnmount: function () {
         SettingsStore.removeChangeListener(this.onChange);

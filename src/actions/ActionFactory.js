@@ -24,11 +24,6 @@ var CreateFactory = {
             value: iterationLength
         });
     },
-    loadSetting:function () {
-        Dispatcher.dispatch({
-                type: Constant.SETTING_LOAD
-        });
-    },
 };
 
 module.exports = CreateFactory;
