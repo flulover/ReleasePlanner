@@ -35,8 +35,7 @@ function _getAdjustFunc(adjustWay) {
     };
 
     var roundToHalf = function (iterationLength) {
-        var integerPart = Math.floor(iterationLength);
-        return integerPart + 0.5;
+        return Math.floor(iterationLength) + 0.5;
     };
 
     var map = {
