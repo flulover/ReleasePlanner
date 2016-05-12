@@ -4,8 +4,6 @@
   "description": "",
   "main": "index.js",
   "dependencies": {
-    "babel-preset-react": "^6.5.0",
-    "babelify": "^7.3.0",
     "events": "^1.1.0",
     "flux": "^2.1.1",
     "keymirror": "^0.1.1",
@@ -14,8 +12,7 @@
     "react-dom": "^15.0.2"
   },
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "build": "browserify -t [ babelify --presets [ react es2015 ] ] src/components/ReleasePlan.js -o src/App.js"
+    "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
     "type": "git",
@@ -26,5 +23,14 @@
   "bugs": {
     "url": "https://github.com/flulover/ReleasePlanner/issues"
   },
-  "homepage": "https://github.com/flulover/ReleasePlanner#readme"
+  "homepage": "https://github.com/flulover/ReleasePlanner#readme",
+  "devDependencies": {
+    "babel-preset-es2015": "^6.6.0",
+    "babel-preset-react": "^6.5.0",
+    "babelify": "^7.3.0",
+    "browserify": "^13.0.1",
+    "fs": "0.0.2",
+    "gulp": "^3.9.1",
+    "vinyl-source-stream": "^1.1.0"
+  }
 }
