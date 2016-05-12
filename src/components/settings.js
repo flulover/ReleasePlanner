@@ -3,9 +3,9 @@
  * Created by yzzhou on 5/11/16.
  */
 
-var React = require('react');
-var ActionFactory = require('../actions/ActionFactory');
-var SettingsStore = require('../stores/SettingsStore');
+import React from 'react';
+import ActionFactory from '../actions/ActionFactory';
+import SettingsStore from '../stores/SettingsStore';
 
 var Settings = React.createClass({
     getInitialState: function () {

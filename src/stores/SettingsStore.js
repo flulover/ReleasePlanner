@@ -2,11 +2,12 @@
  *
  * Created by yzzhou on 5/11/16.
  */
-var Dispatcher = require('../dispatcher/dispatcher');
-var Assign = require('object-assign');
-var EventEmitter = require('events').EventEmitter;
-var Constant = require('../constants/constants');
-var ActionFactory = require('../actions/ActionFactory');
+import Dispatcher from '../dispatcher/dispatcher';
+import Assign from 'object-assign';
+import { EventEmitter } from 'events';
+import Constant from '../constants/constants';
+import ActionFactory from '../actions/ActionFactory';
+
 
 var _settings = {
     developerCount: 0,
@@ -17,8 +18,7 @@ var _settings = {
 var _loadSettings = function () {
     var Settings = AV.Object.extend('Settings');
     var query = new AV.Query(Settings);
-    query.find().then(function(results) {
-        var settings = results[0];
+    query.find().then(function([settings]) {
         _settings.developerCount = settings.get('developerCount'),
         _settings.velocity = settings.get('velocity'),
         _settings.iterationLength = settings.get('iterationLength')

@@ -2,10 +2,10 @@
  *
  * Created by yzzhou on 5/11/16.
  */
-var Dispatcher = require('../dispatcher/dispatcher');
-var Constant = require('../constants/constants');
+import Dispatcher from '../dispatcher/dispatcher';
+import Constant from '../constants/constants';
 
-var CreateFactory = {
+var ActionFactory = {
     changeDeveloperCount: function (developerCount) {
         Dispatcher.dispatch({
             type: Constant.SETTING_CHANGE_DEVELOPER_COUNT,
@@ -37,4 +37,4 @@ var CreateFactory = {
     }
 };
 
-module.exports = CreateFactory;
+module.exports = ActionFactory;

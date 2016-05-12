@@ -3,7 +3,7 @@
  * Created by yzzhou on 5/11/16.
  */
 
-var React = require('react');
+import React from 'react';
 
 var ReleaseForm = React.createClass({
     getInitialState: function () {

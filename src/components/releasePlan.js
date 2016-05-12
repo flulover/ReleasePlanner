@@ -2,13 +2,12 @@
  *
  * Created by yzzhou on 5/5/16.
  */
-var React = require('react');
-var ReactDOM = require('react-dom');
-var ReleasePlanStore = require('../stores/ReleasePlanStore');
-
-var Settings = require('./Settings');
-var ReleaseForm = require('./ReleaseForm');
-var ActionFactory = require('../actions/ActionFactory');
+import React from 'react';
+import ReactDOM from 'react-dom';
+import ReleasePlanStore from '../stores/ReleasePlanStore';
+import Settings from './Settings';
+import ReleaseForm from './ReleaseForm';
+import ActionFactory from '../actions/ActionFactory';
 
 var ReleaseList = React.createClass({
     createNoteNode: function (factList) {

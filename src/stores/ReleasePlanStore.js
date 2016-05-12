@@ -3,12 +3,12 @@
  * Created by yzzhou on 5/11/16.
  */
 
-var Dispatcher = require('../dispatcher/dispatcher');
-var Assign = require('object-assign');
-var EventEmitter = require('events').EventEmitter;
-var Util = require('../util/util');
-var Constant = require('../constants/constants');
-var SettingsStore = require('./SettingsStore');
+import Dispatcher from '../dispatcher/dispatcher';
+import Assign from 'object-assign';
+import { EventEmitter } from 'events';
+import Constant from '../constants/constants';
+import SettingsStore from './SettingsStore';
+import Util from '../util/util';
 
 var _rawReleasePlanList = [];
 
@@ -25,8 +25,7 @@ function _getDaysInOneIteration() {
 }
 
 function _getAdjustFunc(adjustWay) {
-    if (adjustWay === ''
-        || adjustWay === undefined) {
+    if (adjustWay === '' || adjustWay === undefined) {
         return Math.ceil;
     }
 
