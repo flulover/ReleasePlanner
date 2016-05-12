@@ -139,7 +139,7 @@ function _addReleasePlan(release) {
 }
 
 var ReleasePlanStore = Assign({}, EventEmitter.prototype, {
-    loadReleasePlans: function () {
+    loadReleasePlans() {
         var Release = AV.Object.extend('Release');
         var query = new AV.Query(Release);
         query.find().then(function(results) {
@@ -152,16 +152,16 @@ var ReleasePlanStore = Assign({}, EventEmitter.prototype, {
             console.log('Error: ' + error.code + ' ' + error.message);
         });
     },
-    getReleaseList: function () {
+    getReleaseList() {
         return _calculateReleasePlan(_rawReleasePlanList);
     },
-    addChangeListener: function (callback) {
+    addChangeListener(callback) {
         this.on(Constant.RELEASE_PLAN_CHANGE, callback);
     },
-    removeChangeListener: function (callback) {
+    removeChangeListener(callback) {
         this.removeListener(Constant.RELEASE_PLAN_CHANGE, callback);
     },
-    emitChange: function () {
+    emitChange() {
         this.emit(Constant.RELEASE_PLAN_CHANGE);
     }
 });

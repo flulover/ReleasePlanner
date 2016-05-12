@@ -10,7 +10,7 @@ import ReleaseForm from './ReleaseForm';
 import ActionFactory from '../actions/ActionFactory';
 
 var ReleaseList = React.createClass({
-    createNoteNode: function (factList) {
+    createNoteNode(factList) {
         return (
             <ul>
             {factList.map(function (fact, index) {
@@ -22,7 +22,7 @@ var ReleaseList = React.createClass({
             </ul>
         );
     },
-    createReleaseNode: function (release) {
+    createReleaseNode(release) {
         return (
             <tr key={release.id}>
                 <td>{release.get('name')}</td>
@@ -37,7 +37,7 @@ var ReleaseList = React.createClass({
             </tr>
         );
     },
-    render: function () {
+    render() {
        return (
            <table>
                <thead>
@@ -62,21 +62,21 @@ var ReleaseList = React.createClass({
 });
 
 var ReleasePlan = React.createClass({
-    getInitialState: function () {
+    getInitialState() {
         return {
             releasePlanList: []
         };
     },
-    componentDidMount: function () {
+    componentDidMount() {
         ReleasePlanStore.addChangeListener(this.onChange);
     },
-    componentWillUnmount: function () {
+    componentWillUnmount() {
         ReleasePlanStore.removeChangeListener(this.onChange);
     },
-    onChange: function () {
+    onChange() {
         this.setState({releasePlanList: ReleasePlanStore.getReleaseList()});
     },
-   handleReleaseSubmit: function (release) {
+   handleReleaseSubmit(release) {
         var Release = AV.Object.extend('Release');
         var release = new Release(release);
         release.save().then(
@@ -85,7 +85,7 @@ var ReleasePlan = React.createClass({
             }
         );
     },
-    render: function () {
+    render() {
         return (
             <div>
                 <Settings></Settings>

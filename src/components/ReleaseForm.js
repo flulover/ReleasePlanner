@@ -6,16 +6,16 @@
 import React from 'react';
 
 var ReleaseForm = React.createClass({
-    getInitialState: function () {
+    getInitialState() {
         return {
             isFormClosed: false,
             factList: []
         };
     },
-    toggleReleaseForm: function () {
+    toggleReleaseForm() {
         this.setState({isFormClosed: !this.state.isFormClosed});
     },
-    getFactList: function () {
+    getFactList() {
         var factList = [];
         for (var i = 0; i < this.state.factList.length; ++i){
             var fact = this.state.factList[i];
@@ -36,7 +36,7 @@ var ReleaseForm = React.createClass({
         }
         return factList;
     },
-    handleSubmit: function (e) {
+    handleSubmit(e) {
         e.preventDefault();
         var name = this.refs.releaseName.value || 'No Name';
         var scope = this.refs.releaseScope.value || 0;
@@ -60,12 +60,12 @@ var ReleaseForm = React.createClass({
             isFormClosed: true
         });
     },
-    handleCancel: function () {
+    handleCancel() {
         this.setState({
             isFormClosed: true
         });
     },
-    handleAddFact: function () {
+    handleAddFact() {
         var fact = {
             type: 'other'
         };
@@ -73,13 +73,13 @@ var ReleaseForm = React.createClass({
         var factList = this.state.factList.concat(fact);
         this.setState({factList: factList});
     },
-    handleFactTypeChange: function (e) {
+    handleFactTypeChange(e) {
         var index = parseInt(e.target.id.split('-')[1]);
         var state = this.state;
         state.factList[index].type = e.target.value;
         this.setState(state);
     },
-    render: function () {
+    render() {
         var self = this;
         return (
             <div>

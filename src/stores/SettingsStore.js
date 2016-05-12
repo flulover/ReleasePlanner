@@ -79,31 +79,31 @@ function _saveSettings() {
 }
 
 var SettingsStore = Assign({}, EventEmitter.prototype, {
-    changeDeveloperCount: function (developerCount) {
+    changeDeveloperCount(developerCount) {
         _settings.developerCount = developerCount;
         _saveSettings();
         SettingsStore.emitChange();
     },
-    changeVelocity: function (velocity) {
+    changeVelocity(velocity) {
         _settings.velocity = velocity;
         _saveSettings();
         SettingsStore.emitChange();
     },
-    changeIterationLength: function (iterationLength) {
+    changeIterationLength(iterationLength) {
         _settings.iterationLength = iterationLength;
         _saveSettings();
         SettingsStore.emitChange();
     },
-    addChangeListener: function (callback) {
+    addChangeListener(callback) {
         this.on(Constant.SETTING_CHANGE, callback);
     },
-    removeChangeListener: function (callback) {
+    removeChangeListener(callback) {
         this.removeListener(Constant.SETTING_CHANGE, callback);
     },
-    emitChange: function () {
+    emitChange() {
         this.emit(Constant.SETTING_CHANGE);
     },
-    getSettings: function () {
+    getSettings() {
         return _settings;
     },
 });

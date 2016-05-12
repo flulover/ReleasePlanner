@@ -2,7 +2,7 @@
  *
  * Created by yzzhou on 5/11/16.
  */
-var KeyMirror = require('keymirror');
+import KeyMirror from 'keymirror';
 
 module.exports = KeyMirror({
     SETTING_CHANGE_DEVELOPER_COUNT: null,

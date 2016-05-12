@@ -6,30 +6,30 @@ import Dispatcher from '../dispatcher/dispatcher';
 import Constant from '../constants/constants';
 
 var ActionFactory = {
-    changeDeveloperCount: function (developerCount) {
+    changeDeveloperCount(developerCount) {
         Dispatcher.dispatch({
             type: Constant.SETTING_CHANGE_DEVELOPER_COUNT,
             value: developerCount
         });
     },
-    changeVelocity: function (velocity) {
+    changeVelocity(velocity) {
         Dispatcher.dispatch({
             type: Constant.SETTING_CHANGE_VELOCITY,
             value: velocity
         });
     },
-    changeIterationLength: function (iterationLength) {
+    changeIterationLength(iterationLength) {
         Dispatcher.dispatch({
             type: Constant.SETTING_CHANGE_ITERATION_LENGTH,
             value: iterationLength
         });
     },
-    loadReleasePlans: function () {
+    loadReleasePlans() {
         Dispatcher.dispatch( {
             type: Constant.RELEASE_PLAN_LOAD
         });
     },
-    addReleasePlan: function (release) {
+    addReleasePlan(release) {
         Dispatcher.dispatch( {
             type: Constant.RELEASE_PLAN_ADD,
             value: release

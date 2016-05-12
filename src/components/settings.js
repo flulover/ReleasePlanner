@@ -8,29 +8,29 @@ import ActionFactory from '../actions/ActionFactory';
 import SettingsStore from '../stores/SettingsStore';
 
 var Settings = React.createClass({
-    getInitialState: function () {
+    getInitialState() {
         return {
             developerCount: 0,
             velocity: 0,
             iterationLength: 0,
         };
     },
-    componentDidMount: function () {
+    componentDidMount() {
         SettingsStore.addChangeListener(this.onChange);
     },
-    componentWillUnmount: function () {
+    componentWillUnmount() {
         SettingsStore.removeChangeListener(this.onChange);
     },
-    onChange: function () {
+    onChange() {
         this.setState(SettingsStore.getSettings());
     },
-    handleDeveloperCountChanged: function (e) {
+    handleDeveloperCountChanged(e) {
         ActionFactory.changeDeveloperCount(parseInt(e.target.value));
     },
-    handleVelocityChanged: function (e) {
+    handleVelocityChanged(e) {
         ActionFactory.changeVelocity(parseInt(e.target.value));
     },
-    handleIterationLengthChanged: function (e) {
+    handleIterationLengthChanged(e) {
         ActionFactory.changeIterationLength(parseInt(e.target.value));
     },
     render: function () {
