@@ -79,17 +79,13 @@ var ReleasePlan = React.createClass({
    handleReleaseSubmit(release) {
         var Release = AV.Object.extend('Release');
         var release = new Release(release);
-        release.save().then(
-            function (release) {
-                ActionFactory.addReleasePlan(release);
-            }
-        );
+        release.save().then((release) => ActionFactory.addReleasePlan(release));
     },
     render() {
         return (
             <div>
                 <Settings></Settings>
-                <ReleaseForm onReleaseSubmit={this.handleReleaseSubmit}></ReleaseForm>
+                <ReleaseForm onSubmit={this.handleReleaseSubmit}></ReleaseForm>
                 <ReleaseList releases={this.state.releasePlanList}></ReleaseList>
             </div>
         );

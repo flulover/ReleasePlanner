@@ -47,7 +47,7 @@ var ReleaseForm = React.createClass({
         var wayToCalculateDevelopmentIteration = checkedWay ? checkedWay.value : 'Ceil';
         var factList = this.getFactList();
 
-        this.props.onReleaseSubmit({
+        this.props.onSubmit({
             name: name,
             scope: scope,
             startDate: startDate,
