@@ -99,6 +99,36 @@ var ReleaseForm = React.createClass({
             </div>
         );
 
+        let otherFact = (index) => {
+            return <div>
+                <label>Impacted Points
+                    <input type="number" ref={'impactedPoints-' + index}/>
+                </label><br/>
+                <label>Note
+                    <textarea ref={'impactedNote-' + index} name="" id="" cols="20" rows="4"></textarea>
+                </label>
+            </div>
+        };
+
+        let publicHolidayFact = (index) => {
+            return <div>
+                <label>
+                    Start Date
+                    <input type="date" ref={'startDate-' + index}/>
+                </label>
+                <label>
+                    End Date
+                    <input type="date" ref={'endDate-' + index}/>
+                </label><br/>
+                <label>Note
+                    <textarea ref={'impactedNote-' + index} name="" id="" cols="20" rows="4"></textarea>
+                </label><br/>
+                <label>Custom Impact Points
+                    <input type="number" ref={'customImpactedPoints-' + index}/>
+                </label><br/>
+            </div>
+        };
+
         return (
             <div>
                 <button onClick={this.toggleReleaseForm}>New Release</button>
@@ -113,30 +143,13 @@ var ReleaseForm = React.createClass({
                                     <option value="personalLeave">Personal Leave</option>
                                     <option value="other">Other</option>
                                 </select>
-                                <div hidden={self.state.factList[index].type != 'other'}>
-                                    <label>Impacted Points
-                                        <input type="number" ref={'impactedPoints-' + index}/>
-                                    </label><br/>
-                                    <label>Note
-                                        <textarea ref={'impactedNote-' + index} name="" id="" cols="20" rows="4"></textarea>
-                                    </label>
-                                </div>
-                                <div hidden={self.state.factList[index].type != 'publicHoliday'}>
-                                    <label>
-                                        Start Date
-                                        <input type="date" ref={'startDate-' + index}/>
-                                    </label>
-                                    <label>
-                                        End Date
-                                        <input type="date" ref={'endDate-' + index}/>
-                                    </label><br/>
-                                    <label>Note
-                                        <textarea ref={'impactedNote-' + index} name="" id="" cols="20" rows="4"></textarea>
-                                    </label><br/>
-                                    <label>Custom Impact Points
-                                        <input type="number" ref={'customImpactedPoints-' + index}/>
-                                    </label><br/>
-                                </div>
+                                { (() => {
+                                    switch(self.state.factList[index].type){
+                                        case "other":
+                                            return otherFact(index)
+                                        case "publicHoliday":
+                                            return publicHolidayFact(index)
+                                } })()}
                             </div>
                         );
                     })}
