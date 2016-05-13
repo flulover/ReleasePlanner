@@ -8,7 +8,7 @@ var ReleaseList = React.createClass({
     createNoteNode(factList) {
         return (
             <ul>
-                {factList.map(function (fact, index) {
+                {factList.map((fact, index) => {
                     return (
                         <li key={'fact-note-' + index}>
                             {fact.impactedNote + '(' + fact.impactedPoints + ' point' + ((Math.abs(fact.impactedPoints) > 1) ? 's': '') + ')'}
