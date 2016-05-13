@@ -134,8 +134,12 @@ function _adjustStartDate(date) {
 }
 
 function _addReleasePlan(release) {
-    _rawReleasePlanList.push(release);
-    ReleasePlanStore.emitChange();
+    let Release = AV.Object.extend('Release');
+    let releaseAV = new Release(release);
+    releaseAV.save().then((release) => {
+        _rawReleasePlanList.push(release);
+        ReleasePlanStore.emitChange();
+    });
 }
 
 var ReleasePlanStore = Assign({}, EventEmitter.prototype, {

@@ -76,16 +76,11 @@ var ReleasePlan = React.createClass({
     onChange() {
         this.setState({releasePlanList: ReleasePlanStore.getReleaseList()});
     },
-   handleReleaseSubmit(release) {
-        var Release = AV.Object.extend('Release');
-        var release = new Release(release);
-        release.save().then((release) => ActionFactory.addReleasePlan(release));
-    },
     render() {
         return (
             <div>
                 <Settings></Settings>
-                <ReleaseForm onSubmit={this.handleReleaseSubmit}></ReleaseForm>
+                <ReleaseForm></ReleaseForm>
                 <ReleaseList releases={this.state.releasePlanList}></ReleaseList>
             </div>
         );
