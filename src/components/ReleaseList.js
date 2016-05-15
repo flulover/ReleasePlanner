@@ -3,15 +3,25 @@
  */
 
 import React from 'react';
+import Util from '../util/util';
 
 var ReleaseList = React.createClass({
     createNoteNode(factList) {
         return (
             <ul>
                 {factList.map((fact, index) => {
+                    let leaveNote = '';
+                    if (fact.type === 'publicHoliday'){
+                        let startDate = new Date(fact.startDate);
+                        let endDate = new Date(fact.endDate);
+                        const duration = Util.getDiffDays(startDate, endDate);
+                        const multipleDays = duration > 1 ? 's' : '';
+                        leaveNote = duration + ' day' + multipleDays +
+                            ' public holiday from ' + startDate.toLocaleDateString() + ' to ' + endDate.toLocaleDateString() + '. ';
+                    }
                     return (
                         <li key={'fact-note-' + index}>
-                            {fact.impactedNote + '(' + fact.impactedPoints + ' point' + ((Math.abs(fact.impactedPoints) > 1) ? 's': '') + ')'}
+                            {leaveNote}{fact.impactedNote + '(' + fact.impactedPoints + ' point' + ((Math.abs(fact.impactedPoints) > 1) ? 's': '') + ')'}
                         </li>);
                 })}
             </ul>
