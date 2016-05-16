@@ -8,6 +8,7 @@ import ReleasePlanStore from '../stores/ReleasePlanStore';
 import Settings from './Settings';
 import ReleaseForm from './ReleaseForm';
 import ReleaseList from './ReleaseList';
+import SettingsStore from '../stores/SettingsStore';
 
 
 var ReleasePlan = React.createClass({
@@ -18,9 +19,11 @@ var ReleasePlan = React.createClass({
     },
     componentDidMount() {
         ReleasePlanStore.addChangeListener(this.onChange);
+        SettingsStore.addChangeListener(this.onChange);
     },
     componentWillUnmount() {
         ReleasePlanStore.removeChangeListener(this.onChange);
+        SettingsStore.removeListener(this.onChange);
     },
     onChange() {
         this.setState({releasePlanList: ReleasePlanStore.getReleaseList()});

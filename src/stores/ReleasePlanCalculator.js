@@ -49,7 +49,7 @@ function _getVelocityForOneDay() {
 }
 
 function _getImpactedPoint(release) {
-    var factList = release.get('factList');
+    var factList = release['factList'];
     var impactedPoints = 0;
     for(var i = 0; i < factList.length; ++i){
         var fact = factList[i];
@@ -60,7 +60,7 @@ function _getImpactedPoint(release) {
                 fact.impactedPoints = parseInt(fact.customImpactedPoints);
                 impactedPoints += fact.impactedPoints;
             }else{
-                let overlayDateRange = Util.getOverlapDateRange(release.get('startDate'),
+                let overlayDateRange = Util.getOverlapDateRange(release['startDate'],
                     new Date(fact['endDate']),
                     new Date(fact['startDate']),
                     new Date(fact['endDate'])
@@ -74,7 +74,7 @@ function _getImpactedPoint(release) {
                 fact.impactedPoints = parseInt(fact.customImpactedPoints);
                 impactedPoints += fact.impactedPoints;
             }else{
-                let overlayDateRange = Util.getOverlapDateRange(release.get('startDate'),
+                let overlayDateRange = Util.getOverlapDateRange(release['startDate'],
                     new Date(fact['endDate']),
                     new Date(fact['startDate']),
                     new Date(fact['endDate'])
@@ -91,47 +91,53 @@ function _getImpactedPoint(release) {
 }
 
 function _calculateDevelopmentIterationCount(release){
-    var adjustFunc = _getAdjustFunc(release.get('wayToCalculateDevelopmentIteration'));
-    return adjustFunc((parseInt(release.get('scope')) + _getImpactedPoint(release)) / _getVelocity());
+    var adjustFunc = _getAdjustFunc(release['wayToCalculateDevelopmentIteration']);
+    return adjustFunc((parseInt(release['scope']) + _getImpactedPoint(release)) / _getVelocity());
 }
 
 function _calculateReleasePlanForOneRelease(release, startDate, delayedDays) {
-    release.set('startDate', startDate);
+    release['startDate'] = startDate;
 
     var developmentIterationCount = _calculateDevelopmentIterationCount(release);
-    release.set('developmentIterations', developmentIterationCount);
+    release['developmentIterations'] = developmentIterationCount;
 
     var daysInOneIteration = _getDaysInOneIteration();
     var daysInThisRelease = daysInOneIteration * developmentIterationCount;
-    var daysInRegressionTest = release.get('regressionIterations') * daysInOneIteration;
+    var daysInRegressionTest = release['regressionIterations'] * daysInOneIteration;
     var bestReleaseDate = startDate;
     bestReleaseDate.setDate(bestReleaseDate.getDate() + daysInThisRelease + daysInRegressionTest);
-    release.set('bestReleaseDate', bestReleaseDate.toDateString());
+    release['bestReleaseDate'] = bestReleaseDate.toDateString();
 
     var worstReleaseDate = bestReleaseDate;
     worstReleaseDate.setDate(bestReleaseDate.getDate() + delayedDays);
-    release.set('worstReleaseDate', worstReleaseDate.toDateString());
+    release['worstReleaseDate'] = worstReleaseDate.toDateString();
 
     return release;
 }
 
-function calculateReleasePlan(rawReleaseList) {
+function calculateReleasePlan(originalRawReleaseList) {
+    var rawReleaseList = JSON.parse(JSON.stringify(originalRawReleaseList));
+
+    if (rawReleaseList.length === 0){
+        return [];
+    }
+
     var firstRelease = rawReleaseList[0];
-    var firstStartDate = _adjustStartDate(new Date(firstRelease.get('startDate')));
-    var bufferByDay = firstRelease.get('buffer') * _getDaysInOneIteration();
+    var firstStartDate = _adjustStartDate(new Date(firstRelease['startDate']));
+    var bufferByDay = firstRelease['buffer'] * _getDaysInOneIteration();
     var releaseList = [];
     releaseList.push(_calculateReleasePlanForOneRelease(firstRelease, firstStartDate, bufferByDay));
 
     for(let i = 1; i < rawReleaseList.length; ++i){
         var release = rawReleaseList[i];
-        var lastReleaseDate = new Date(releaseList[i - 1].get('bestReleaseDate'));
+        var lastReleaseDate = new Date(releaseList[i - 1]['bestReleaseDate']);
         var startDate = lastReleaseDate;
         startDate.setDate(lastReleaseDate.getDate() + 1);
         startDate = _adjustStartDate(startDate);
 
         var mayDelayDay = 0;
         for (let j = 0; j < rawReleaseList.length; ++j){
-            mayDelayDay += rawReleaseList[j].get('buffer') * _getDaysInOneIteration();
+            mayDelayDay += rawReleaseList[j]['buffer'] * _getDaysInOneIteration();
         }
         releaseList.push(_calculateReleasePlanForOneRelease(release, startDate, mayDelayDay));
     }

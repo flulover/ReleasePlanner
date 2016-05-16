@@ -38,14 +38,14 @@ var ReleaseList = React.createClass({
     createReleaseNode(release) {
         return (
             <tr key={release.id}>
-                <td>{release.get('name')}</td>
-                <td>{release.get('scope')}</td>
-                <td>{release.get('developmentIterations')}</td>
-                <td>{release.get('regressionIterations')}</td>
-                <td>{release.get('buffer')}</td>
-                <td>{release.get('bestReleaseDate')}</td>
-                <td>{release.get('worstReleaseDate')}</td>
-                <td>{this.createNoteNode(release.get('factList'))}</td>
+                <td>{release['name']}</td>
+                <td>{release['scope']}</td>
+                <td>{release['developmentIterations']}</td>
+                <td>{release['regressionIterations']}</td>
+                <td>{release['buffer']}</td>
+                <td>{release['bestReleaseDate']}</td>
+                <td>{release['worstReleaseDate']}</td>
+                <td>{this.createNoteNode(release['factList'])}</td>
                 <td>Actions</td>
             </tr>
         );
