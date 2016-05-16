@@ -18,6 +18,14 @@ var ReleaseList = React.createClass({
                         const multipleDays = duration > 1 ? 's' : '';
                         leaveNote = duration + ' day' + multipleDays +
                             ' public holiday from ' + startDate.toLocaleDateString() + ' to ' + endDate.toLocaleDateString() + '. ';
+                    }else if (fact.type === 'personalLeave'){
+                        let startDate = new Date(fact.startDate);
+                        let endDate = new Date(fact.endDate);
+                        let who = 'Zhengzheng';
+                        const duration = Util.getDiffWorkDays(startDate, endDate);
+                        const multipleDays = duration > 1 ? 's' : '';
+                        leaveNote = duration + ' day' + multipleDays +
+                            ' personal leave asked by ' + who  + ' from ' + startDate.toLocaleDateString() + ' to ' + endDate.toLocaleDateString() + '. ';
                     }
                     return (
                         <li key={'fact-note-' + index}>
