@@ -3,7 +3,7 @@
  * Created by yzzhou on 5/15/16.
  */
 import SettingsStore from './SettingsStore';
-import Util from '../util/util';
+import Util from '../util/Util';
 
 function _getIterationLength(){
     return SettingsStore.getSettings().iterationLength;

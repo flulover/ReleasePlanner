@@ -3,7 +3,7 @@
  */
 
 import React from 'react';
-import Util from '../util/util';
+import Util from '../util/Util';
 
 var ReleaseList = React.createClass({
     createNoteNode(factList) {
