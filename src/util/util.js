@@ -3,13 +3,23 @@
  * Created by yzzhou on 5/11/16.
  */
 
-function _getDiffDays(startDate, endDate) {
-    var oneDay = 24*60*60*1000;
-    return Math.round(Math.abs((endDate.getTime() - startDate.getTime())/(oneDay))) + 1;
+function _getDiffWorkDays(startDate, endDate) {
+    if (startDate.getTime() > endDate.getTime()){
+        return 0;
+    }
+
+    let workDay = 0;
+    for (let curDate = new Date(startDate); curDate.getTime() != endDate.getTime();){
+        if (curDate.getDay() === 0 || curDate.getDay() === 6){
+            workDay++;
+        }
+        curDate.setDate(curDate.getDate() + 1);
+    }
+    return workDay;
 }
 
 var Util = {
-    getDiffDays: _getDiffDays,
+    getDiffWorkDays: _getDiffWorkDays,
 };
 
 module.exports = Util;

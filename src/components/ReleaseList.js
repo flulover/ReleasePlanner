@@ -14,7 +14,7 @@ var ReleaseList = React.createClass({
                     if (fact.type === 'publicHoliday'){
                         let startDate = new Date(fact.startDate);
                         let endDate = new Date(fact.endDate);
-                        const duration = Util.getDiffDays(startDate, endDate);
+                        const duration = Util.getDiffWorkDays(startDate, endDate);
                         const multipleDays = duration > 1 ? 's' : '';
                         leaveNote = duration + ' day' + multipleDays +
                             ' public holiday from ' + startDate.toLocaleDateString() + ' to ' + endDate.toLocaleDateString() + '. ';
