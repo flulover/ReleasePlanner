@@ -84,7 +84,7 @@ var ReleaseForm = React.createClass({
         var self = this;
         let basicInfo = (
             <div>
-                <label>Name <input ref="releaseName" type="text" defaultValue="ais 2a" /></label><br/>
+                <label>Name <input ref="releaseName" type="text" defaultValue="2a" /></label><br/>
                 <label>Scope <input ref="releaseScope" type="number" defaultValue="100"/></label><br/>
                 <label>Start Date <input ref="releaseStartDate" type="date" /></label><br/>
                 <label>Regression Iterations <input ref="releaseRegressionIterations" type="number" step="0.1" defaultValue="1"/></label><br/>

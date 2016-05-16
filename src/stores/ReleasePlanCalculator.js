@@ -83,14 +83,8 @@ function _getImpactedPoint(release) {
 }
 
 function _calculateDevelopmentIterationCount(release){
-    var velocity = _getVelocity();
     var adjustFunc = _getAdjustFunc(release.get('wayToCalculateDevelopmentIteration'));
-    var idealDevelopmentIterations = adjustFunc(release.get('scope') / velocity);
-    var lastIterationPoints = release.get('scope') - (idealDevelopmentIterations - 1) * velocity;
-    var impactedPoints = _getImpactedPoint(release);
-
-    var tailIterationCount = adjustFunc((lastIterationPoints + impactedPoints*-1) / velocity);
-    return idealDevelopmentIterations - 1 + tailIterationCount;
+    return adjustFunc((parseInt(release.get('scope')) + _getImpactedPoint(release)) / _getVelocity());
 }
 
 function _calculateReleasePlanForOneRelease(release, startDate, delayedDays) {
