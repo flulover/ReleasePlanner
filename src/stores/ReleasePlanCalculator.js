@@ -13,6 +13,10 @@ function _getVelocity() {
     return SettingsStore.getSettings().velocity;
 }
 
+function _getDeveloperCount() {
+    return SettingsStore.getSettings().developerCount;
+}
+
 function _getDaysInOneIteration() {
     return _getIterationLength() * 7;
 }
@@ -57,8 +61,19 @@ function _getImpactedPoint(release) {
                 impactedPoints += fact.impactedPoints;
             }else{
                 var velocityForOneDay = _getVelocityForOneDay();
-                var diffDays = Util.getDiffDays(new Date(fact['startDate']), new Date(fact['endDate']));
+                var diffDays = Util.getDiffWorkDays(new Date(fact['startDate']), new Date(fact['endDate']));
                 fact.impactedPoints = Math.ceil(diffDays * velocityForOneDay);
+                impactedPoints += fact.impactedPoints;
+            }
+        }else if (fact.type === 'personalLeave'){
+            if (parseInt(fact.customImpactedPoints)){
+                fact.impactedPoints = parseInt(fact.customImpactedPoints);
+                impactedPoints += fact.impactedPoints;
+            }else{
+                const velocityForOneDay = _getVelocityForOneDay();
+                const velocityForOnePersonADay = velocityForOneDay / _getDeveloperCount();
+                var diffDays = Util.getDiffWorkDays(new Date(fact['startDate']), new Date(fact['endDate']));
+                fact.impactedPoints = Math.ceil(diffDays * velocityForOnePersonADay);
                 impactedPoints += fact.impactedPoints;
             }
         }

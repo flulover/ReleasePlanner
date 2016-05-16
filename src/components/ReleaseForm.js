@@ -24,13 +24,11 @@ var ReleaseForm = React.createClass({
             if (type === 'other'){
                 fact.impactedPoints = this.refs['impactedPoints-' + i].value;
                 fact.impactedNote = this.refs['impactedNote-' + i].value;
-            }else if (type === 'publicHoliday'){
+            }else if (type === 'publicHoliday' || type === "personalLeave"){
                 fact.impactedNote = this.refs['impactedNote-' + i].value;
                 fact.customImpactedPoints = this.refs['customImpactedPoints-' + i].value;
                 fact.startDate = this.refs['startDate-' + i].value;
                 fact.endDate = this.refs['endDate-' + i].value;
-            }else if (type === 'personalLeave'){
-
             }
 
             factList.push(fact);
@@ -46,7 +44,7 @@ var ReleaseForm = React.createClass({
         var regressionIterations = this.refs.releaseRegressionIterations.value || 1;
         var buffer = this.refs.releaseBuffer.value || 0.5;
         var checkedWay = document.querySelector('input[name="wayToCalculateDevelopmentIteration"]:checked');
-        var wayToCalculateDevelopmentIteration = checkedWay ? checkedWay.value : 'Ceil';
+        var adjustFunc = checkedWay ? checkedWay.value : 'Ceil';
         var factList = this.getFactList();
 
         let release = {
@@ -55,7 +53,7 @@ var ReleaseForm = React.createClass({
             startDate,
             regressionIterations,
             buffer,
-            wayToCalculateDevelopmentIteration,
+            adjustFunc,
             factList
         };
 
@@ -129,6 +127,8 @@ var ReleaseForm = React.createClass({
             </div>
         };
 
+        let personalLeaveFact = publicHolidayFact;
+
         return (
             <div>
                 <button onClick={this.toggleReleaseForm}>New Release</button>
@@ -146,9 +146,11 @@ var ReleaseForm = React.createClass({
                                 { (() => {
                                     switch(self.state.factList[index].type){
                                         case "other":
-                                            return otherFact(index)
+                                            return otherFact(index);
                                         case "publicHoliday":
-                                            return publicHolidayFact(index)
+                                            return publicHolidayFact(index);
+                                        case "personalLeave":
+                                            return personalLeaveFact(index);
                                 } })()}
                             </div>
                         );
