@@ -31,9 +31,16 @@ function getDiffDays(startDate, endDate) {
     return _getDiffDays(startDate, endDate, false);
 }
 
+function getOverlapDateRange(startDate1, endDate1, startDate2, endDate2) {
+    let startDate = startDate1.getTime() > startDate2.getTime() ? startDate1 : startDate2;
+    let endDate = endDate1.getTime() < endDate2.getTime() ? endDate1 : endDate2;
+    return {startDate, endDate};
+}
+
 var Util = {
     getDiffWorkDays,
     getDiffDays,
+    getOverlapDateRange,
 };
 
 module.exports = Util;

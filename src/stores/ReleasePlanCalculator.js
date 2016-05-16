@@ -60,9 +60,13 @@ function _getImpactedPoint(release) {
                 fact.impactedPoints = parseInt(fact.customImpactedPoints);
                 impactedPoints += fact.impactedPoints;
             }else{
-                var velocityForOneDay = _getVelocityForOneDay();
-                var diffDays = Util.getDiffWorkDays(new Date(fact['startDate']), new Date(fact['endDate']));
-                fact.impactedPoints = Math.ceil(diffDays * velocityForOneDay);
+                let overlayDateRange = Util.getOverlapDateRange(release.get('startDate'),
+                    new Date(fact['endDate']),
+                    new Date(fact['startDate']),
+                    new Date(fact['endDate'])
+                );
+                const diffWorkDays = Util.getDiffWorkDays(overlayDateRange.startDate, overlayDateRange.endDate);
+                fact.impactedPoints = Math.ceil(diffWorkDays * _getVelocityForOneDay());
                 impactedPoints += fact.impactedPoints;
             }
         }else if (fact.type === 'personalLeave'){
@@ -70,10 +74,14 @@ function _getImpactedPoint(release) {
                 fact.impactedPoints = parseInt(fact.customImpactedPoints);
                 impactedPoints += fact.impactedPoints;
             }else{
-                const velocityForOneDay = _getVelocityForOneDay();
-                const velocityForOnePersonADay = velocityForOneDay / _getDeveloperCount();
-                const diffDays = Util.getDiffWorkDays(new Date(fact['startDate']), new Date(fact['endDate']));
-                fact.impactedPoints = Math.ceil(diffDays * velocityForOnePersonADay);
+                let overlayDateRange = Util.getOverlapDateRange(release.get('startDate'),
+                    new Date(fact['endDate']),
+                    new Date(fact['startDate']),
+                    new Date(fact['endDate'])
+                );
+                const diffWorkDays = Util.getDiffWorkDays(overlayDateRange.startDate, overlayDateRange.endDate);
+                const velocityForOnePersonADay = _getVelocityForOneDay() / _getDeveloperCount();
+                fact.impactedPoints = Math.ceil(diffWorkDays * velocityForOnePersonADay);
                 impactedPoints += fact.impactedPoints;
             }
         }
@@ -88,6 +96,8 @@ function _calculateDevelopmentIterationCount(release){
 }
 
 function _calculateReleasePlanForOneRelease(release, startDate, delayedDays) {
+    release.set('startDate', startDate);
+
     var developmentIterationCount = _calculateDevelopmentIterationCount(release);
     release.set('developmentIterations', developmentIterationCount);
 

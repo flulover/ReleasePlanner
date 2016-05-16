@@ -24,12 +24,12 @@ var ReleaseList = React.createClass({
                         let endDate = new Date(fact.endDate);
                         const duration = Util.getDiffWorkDays(startDate, endDate);
                         const multipleDays = duration > 1 ? 's' : '';
-                        leaveNote = duration + ' day' + multipleDays +
+                        leaveNote = duration + ' work day' + multipleDays +
                             ' personal leave asked by ' + name  + ' from ' + startDate.toLocaleDateString() + ' to ' + endDate.toLocaleDateString() + '. ';
                     }
                     return (
                         <li key={'fact-note-' + index}>
-                            {leaveNote}{fact.impactedNote + '(' + fact.impactedPoints + ' point' + ((Math.abs(fact.impactedPoints) > 1) ? 's': '') + ')'}
+                            {leaveNote}{fact.impactedNote + '(-' + fact.impactedPoints + ' point' + ((Math.abs(fact.impactedPoints) > 1) ? 's': '') + ')'}
                         </li>);
                 })}
             </ul>
