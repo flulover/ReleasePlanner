@@ -72,7 +72,7 @@ function _getImpactedPoint(release) {
             }else{
                 const velocityForOneDay = _getVelocityForOneDay();
                 const velocityForOnePersonADay = velocityForOneDay / _getDeveloperCount();
-                var diffDays = Util.getDiffWorkDays(new Date(fact['startDate']), new Date(fact['endDate']));
+                const diffDays = Util.getDiffWorkDays(new Date(fact['startDate']), new Date(fact['endDate']));
                 fact.impactedPoints = Math.ceil(diffDays * velocityForOnePersonADay);
                 impactedPoints += fact.impactedPoints;
             }

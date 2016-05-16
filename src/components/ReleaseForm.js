@@ -24,12 +24,19 @@ var ReleaseForm = React.createClass({
             if (type === 'other'){
                 fact.impactedPoints = this.refs['impactedPoints-' + i].value;
                 fact.impactedNote = this.refs['impactedNote-' + i].value;
-            }else if (type === 'publicHoliday' || type === "personalLeave"){
-                fact.impactedNote = this.refs['impactedNote-' + i].value;
-                fact.customImpactedPoints = this.refs['customImpactedPoints-' + i].value;
+            }else if (type === 'publicHoliday'){
                 fact.startDate = this.refs['startDate-' + i].value;
                 fact.endDate = this.refs['endDate-' + i].value;
+                fact.impactedNote = this.refs['impactedNote-' + i].value;
+                fact.customImpactedPoints = this.refs['customImpactedPoints-' + i].value;
+            }else if (type === 'personalLeave'){
+                fact.name = this.refs['name-' + i].value;
+                fact.startDate = this.refs['startDate-' + i].value;
+                fact.endDate = this.refs['endDate-' + i].value;
+                fact.impactedNote = this.refs['impactedNote-' + i].value;
+                fact.customImpactedPoints = this.refs['customImpactedPoints-' + i].value;
             }
+            
 
             factList.push(fact);
         }
@@ -127,7 +134,28 @@ var ReleaseForm = React.createClass({
             </div>
         };
 
-        let personalLeaveFact = publicHolidayFact;
+        let personalLeaveFact = (index) => {
+            return <div>
+                <label htmlFor="">
+                    Name
+                    <input type="text" ref={'name-' + index}/>
+                </label>
+                <label>
+                    Start Date
+                    <input type="date" ref={'startDate-' + index}/>
+                </label>
+                <label>
+                    End Date
+                    <input type="date" ref={'endDate-' + index}/>
+                </label><br/>
+                <label>Note
+                    <textarea ref={'impactedNote-' + index} name="" id="" cols="20" rows="4"></textarea>
+                </label><br/>
+                <label>Custom Impact Points
+                    <input type="number" ref={'customImpactedPoints-' + index}/>
+                </label><br/>
+            </div>
+        };
 
         return (
             <div>
