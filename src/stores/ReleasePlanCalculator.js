@@ -91,7 +91,7 @@ function _getImpactedPoint(release) {
 }
 
 function _calculateDevelopmentIterationCount(release){
-    var adjustFunc = _getAdjustFunc(release['wayToCalculateDevelopmentIteration']);
+    var adjustFunc = _getAdjustFunc(release['adjustFunc']);
     return adjustFunc((parseInt(release['scope']) + _getImpactedPoint(release)) / _getVelocity());
 }
 

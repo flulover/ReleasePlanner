@@ -37,7 +37,7 @@ var ReleaseList = React.createClass({
     },
     createReleaseNode(release) {
         return (
-            <tr key={release.id}>
+            <tr key={release.objectId}>
                 <td>{release['name']}</td>
                 <td>{release['scope']}</td>
                 <td>{release['developmentIterations']}</td>
