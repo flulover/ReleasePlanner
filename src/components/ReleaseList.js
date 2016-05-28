@@ -4,6 +4,7 @@
 
 import React from 'react';
 import Util from '../util/Util';
+import ActionFactory from '../actions/ActionFactory';
 
 var ReleaseList = React.createClass({
     createNoteNode(factList) {
@@ -35,7 +36,7 @@ var ReleaseList = React.createClass({
             </ul>
         );
     },
-    createReleaseNode(release) {
+    createReleaseNode(release, index) {
         return (
             <tr key={release.objectId}>
                 <td>{release['name']}</td>
@@ -46,9 +47,12 @@ var ReleaseList = React.createClass({
                 <td>{release['bestReleaseDate']}</td>
                 <td>{release['worstReleaseDate']}</td>
                 <td>{this.createNoteNode(release['factList'])}</td>
-                <td>Actions</td>
+                <td><button id={index} onClick={this.onEditButtonClicked}>Edit</button></td>
             </tr>
         );
+    },
+    onEditButtonClicked(e){
+        ActionFactory.editReleasePlan(e.target.id);
     },
     render() {
         return (

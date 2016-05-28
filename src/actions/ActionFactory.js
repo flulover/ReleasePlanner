@@ -34,6 +34,12 @@ var ActionFactory = {
             type: Constant.RELEASE_PLAN_ADD,
             value: release
         });
+    },
+    editReleasePlan(releaseIndex){
+        Dispatcher.dispatch( {
+            type: Constant.RELEASE_PLAN_EDIT,
+            value: releaseIndex
+        });
     }
 };
 

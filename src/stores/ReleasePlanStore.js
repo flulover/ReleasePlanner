@@ -21,6 +21,10 @@ function _addReleasePlan(release) {
     });
 }
 
+function _editReleasePlan(releaseIndex) {
+    ReleasePlanStore.emitEditReleasePlan(_rawReleasePlanList[releaseIndex]);
+}
+
 var ReleasePlanStore = Assign({}, EventEmitter.prototype, {
     loadReleasePlans() {
         var Release = AV.Object.extend('Release');
@@ -46,6 +50,15 @@ var ReleasePlanStore = Assign({}, EventEmitter.prototype, {
     },
     emitChange() {
         this.emit(Constant.RELEASE_PLAN_CHANGE);
+    },
+    addEditReleasePlanListener(callback) {
+        this.on(Constant.RELEASE_PLAN_EDIT, callback);
+    },
+    removeEditReleasePlanListener(callback) {
+        this.removeListener(Constant.RELEASE_PLAN_EDIT, callback);
+    },
+    emitEditReleasePlan(editingReleasePlan) {
+        this.emit(Constant.RELEASE_PLAN_EDIT, editingReleasePlan);
     }
 });
 
@@ -53,6 +66,7 @@ Dispatcher.register(function (action) {
     var actionMap = {
         'RELEASE_PLAN_LOAD': ReleasePlanStore.loadReleasePlans,
         'RELEASE_PLAN_ADD': _addReleasePlan,
+        'RELEASE_PLAN_EDIT': _editReleasePlan,
     };
 
     var mapFunc = actionMap[action.type];

@@ -6,10 +6,10 @@
 import React from 'react';
 import ActionFactory from '../actions/ActionFactory';
 
-var ReleaseForm = React.createClass({
+var CreateReleaseForm = React.createClass({
     getInitialState() {
         return {
-            isFormClosed: false,
+            isFormClosed: true,
             factList: []
         };
     },
@@ -159,9 +159,9 @@ var ReleaseForm = React.createClass({
 
         return (
             <div>
-                <button onClick={this.toggleReleaseForm}>New Release</button>
+                <button onClick={this.toggleReleaseForm}>Create Release Plan</button>
                 <form hidden={this.state.isFormClosed} onSubmit={this.handleSubmit}>
-                    <h3>Create Release</h3>
+                    <h3>Create Release Plan</h3>
                     {basicInfo}
                     {this.state.factList.map(function (fact, index) {
                         return (
@@ -193,4 +193,4 @@ var ReleaseForm = React.createClass({
     }
 });
 
-module.exports = ReleaseForm;
+module.exports = CreateReleaseForm;
