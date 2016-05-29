@@ -101,6 +101,22 @@ var EditReleaseForm = React.createClass({
         // this.state.factList[index].type = e.target.value;
         this.setState(this.state);
     },
+    onNameChanged(event){
+        this.state.editingReleasePlan.name = event.target.value;
+        this.setState({editingReleasePlan: this.state.editingReleasePlan});
+    },
+    onScopeChanged(){
+        this.state.editingReleasePlan.scope = event.target.value;
+        this.setState({editingReleasePlan: this.state.editingReleasePlan});
+    },
+    onStartDateChanged(){
+        this.state.editingReleasePlan.startDate = event.target.value;
+        this.setState({editingReleasePlan: this.state.editingReleasePlan});
+    },
+    onBufferChanged(){
+        this.state.editingReleasePlan.buffer = event.target.value;
+        this.setState({editingReleasePlan: this.state.editingReleasePlan});
+    },
     render() {
         var self = this;
         let editingReleasePlan = this.state.editingReleasePlan;
@@ -110,11 +126,11 @@ var EditReleaseForm = React.createClass({
 
         let basicInfo = (
             <div>
-                <label>Name <input ref="releaseName" type="text" defaultValue={editingReleasePlan['name']} /></label><br/>
-                <label>Scope <input ref="releaseScope" type="number" defaultValue={editingReleasePlan['scope']} /></label><br/>
-                <label>Start Date <input ref="releaseStartDate" type="date" defaultValue={editingReleasePlan['startDate']}  /></label><br/>
+                <label>Name <input ref="releaseName" type="text" value={editingReleasePlan['name']} onChange={self.onNameChanged} /></label><br/>
+                <label>Scope <input ref="releaseScope" type="number" value={editingReleasePlan['scope']} onChange={self.onScopeChanged}  /></label><br/>
+                <label>Start Date <input ref="releaseStartDate" type="date" value={editingReleasePlan['startDate']} onChange={self.onStartDateChanged}  /></label><br/>
                 <label>Regression Iterations <input ref="releaseRegressionIterations" type="number" step="0.1" defaultValue={editingReleasePlan['regressionIterations']}/></label><br/>
-                <label>Buffer <input ref="releaseBuffer" type="number" step="0.1" defaultValue={editingReleasePlan['buffer']}/></label><br/>
+                <label>Buffer <input ref="releaseBuffer" type="number" step="0.1" value={editingReleasePlan['buffer']} onChange={self.onBufferChanged}/></label><br/>
                 <label>Way To Calculate Development Iteration
                     <input type="radio" name="wayToCalculateDevelopmentIteration" ref="Ceil" value="Ceil" />Ceil
                     <input type="radio" name="wayToCalculateDevelopmentIteration" ref="RoundToHalf" value="RoundToHalf"/>Round to Half(2.3 or 2.7 to 2.5)
