@@ -16,8 +16,8 @@ var _releasePlanList = [];
 function _addReleasePlan(release) {
     let Release = AV.Object.extend('Release');
     let releaseAV = new Release(release);
-    releaseAV.save().then((release) => {
-        _releasePlanList.push(Util.toJSON(release));
+    releaseAV.save().then((rawReleaseData) => {
+        _releasePlanList.push(Util.toJSON(rawReleaseData));
         ReleasePlanStore.emitChange();
     });
 }
@@ -30,13 +30,13 @@ var ReleasePlanStore = Assign({}, EventEmitter.prototype, {
     loadReleasePlans() {
         var Release = AV.Object.extend('Release');
         var query = new AV.Query(Release);
-        query.find().then(function(results) {
-            if (results.length == 0){
+        query.find().then(function(rawReleasePlans) {
+            if (rawReleasePlans.length == 0){
                 return;
             }
             
-            for (let i = 0; i < results.length; ++i){
-                _releasePlanList.push(Util.toJSON(results[i]));
+            for (let i = 0; i < rawReleasePlans.length; ++i){
+                _releasePlanList.push(Util.toJSON(rawReleasePlans[i]));
             }
 
             ReleasePlanStore.emitChange();
