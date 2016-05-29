@@ -90,15 +90,16 @@ var EditReleaseForm = React.createClass({
         });
     },
     handleAddFact() {
-        var fact = {
+        let fact = {
+            type: 'other'
         };
 
-        var factList = this.state.factList.concat(fact);
-        this.setState({factList});
+        this.state.editingReleasePlan.factList = this.state.editingReleasePlan.factList.concat(fact);
+        this.setState({editingReleasePlan: this.state.editingReleasePlan});
     },
     handleFactTypeChange(e) {
         var index = parseInt(e.target.id.split('-')[1]);
-        // this.state.factList[index].type = e.target.value;
+        this.state.editingReleasePlan.factList[index].type = e.target.value;
         this.setState(this.state);
     },
     onNameChanged(event){
