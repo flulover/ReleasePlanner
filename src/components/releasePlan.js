@@ -22,25 +22,20 @@ var ReleasePlan = React.createClass({
     componentDidMount() {
         ReleasePlanStore.addChangeListener(this.onChange);
         SettingsStore.addChangeListener(this.onChange);
-        ReleasePlanStore.addEditReleasePlanListener(this.onEditReleasePlan);
     },
     componentWillUnmount() {
         ReleasePlanStore.removeChangeListener(this.onChange);
         SettingsStore.removeListener(this.onChange);
-        ReleasePlanStore.removeEditReleasePlanListener(this.onEditReleasePlan);
     },
     onChange() {
         this.setState({releasePlanList: ReleasePlanStore.getReleaseList()});
-    },
-    onEditReleasePlan(editingReleasePlan){
-        this.setState({editingReleasePlan});
     },
     render() {
         return (
             <div>
                 <Settings></Settings>
                 <CreateReleaseForm></CreateReleaseForm>
-                <EditReleaseForm release={this.state.editingReleasePlan}></EditReleaseForm>
+                <EditReleaseForm></EditReleaseForm>
                 <ReleaseList releases={this.state.releasePlanList}></ReleaseList>
             </div>
         );

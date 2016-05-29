@@ -8,21 +8,22 @@ import Assign from 'object-assign';
 import { EventEmitter } from 'events';
 import Constant from '../constants/constants';
 import ReleaePlanCalculator from './ReleasePlanCalculator';
+import Util from '../util/Util';
 
-var _rawReleasePlanList = [];
+var _releasePlanList = [];
 
 
 function _addReleasePlan(release) {
     let Release = AV.Object.extend('Release');
     let releaseAV = new Release(release);
     releaseAV.save().then((release) => {
-        _rawReleasePlanList.push(release);
+        _releasePlanList.push(Util.toJSON(release));
         ReleasePlanStore.emitChange();
     });
 }
 
 function _editReleasePlan(releaseIndex) {
-    ReleasePlanStore.emitEditReleasePlan(_rawReleasePlanList[releaseIndex]);
+    ReleasePlanStore.emitEditReleasePlan(_releasePlanList[releaseIndex]);
 }
 
 var ReleasePlanStore = Assign({}, EventEmitter.prototype, {
@@ -33,14 +34,18 @@ var ReleasePlanStore = Assign({}, EventEmitter.prototype, {
             if (results.length == 0){
                 return;
             }
-            _rawReleasePlanList = results;
+            
+            for (let i = 0; i < results.length; ++i){
+                _releasePlanList.push(Util.toJSON(results[i]));
+            }
+
             ReleasePlanStore.emitChange();
         }, function(error) {
             console.log('Error: ' + error.code + ' ' + error.message);
         });
     },
     getReleaseList() {
-        return ReleaePlanCalculator.calculateReleasePlan(_rawReleasePlanList);
+        return ReleaePlanCalculator.calculateReleasePlan(_releasePlanList);
     },
     addChangeListener(callback) {
         this.on(Constant.RELEASE_PLAN_CHANGE, callback);

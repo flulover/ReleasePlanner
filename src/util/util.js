@@ -37,10 +37,20 @@ function getOverlapDateRange(startDate1, endDate1, startDate2, endDate2) {
     return {startDate, endDate};
 }
 
+function toJSON(avData){
+    return JSON.parse(JSON.stringify(avData));
+}
+
+function isEmptyObject(obj) {
+    return Object.keys(obj).length === 0;
+}
+
 var Util = {
     getDiffWorkDays,
     getDiffDays,
     getOverlapDateRange,
+    toJSON,
+    isEmptyObject,
 };
 
 module.exports = Util;

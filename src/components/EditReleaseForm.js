@@ -5,51 +5,57 @@
 
 import React from 'react';
 import ActionFactory from '../actions/ActionFactory';
+import ReleasePlanStore from '../stores/ReleasePlanStore';
+import Util from '../util/Util'
 
 var EditReleaseForm = React.createClass({
     getInitialState() {
         return {
             isFormClosed: true,
-            factList: [],
+            editingReleasePlan:{},
         };
     },
-    componentWillReceiveProps(){
-        if (this.props.release === undefined){
-            return;
-        }
-
+    componentDidMount() {
+        ReleasePlanStore.addEditReleasePlanListener(this.onEditReleasePlan);
+    },
+    componentWillUnmount() {
+        ReleasePlanStore.removeEditReleasePlanListener(this.onEditReleasePlan);
+    },
+    onEditReleasePlan(editingReleasePlan){
         this.setState({
-            factList: this.props.release.get('factList'),
-            isFormClosed: false});
+            editingReleasePlan,
+            isFormClosed: false,
+        });
     },
     toggleReleaseForm() {
         this.setState({isFormClosed: !this.state.isFormClosed});
     },
-    getFactList() {
-        var factList = [];
-        for (var i = 0; i < this.state.factList.length; ++i){
-            var fact = this.state.factList[i];
-            var type = fact.type;
+    getFactListDto() {
+        var factListDto = [];
+        var factList =this.state.editingReleasePlan['factList'];
+        for (var i = 0; i < factList.length; ++i){
+            var factDto = factList[i];
+            var type = factDto.type;
             if (type === 'other'){
-                fact.impactedPoints = this.refs['impactedPoints-' + i].value;
-                fact.impactedNote = this.refs['impactedNote-' + i].value;
+                factDto.impactedPoints = this.refs['impactedPoints-' + i].value;
+                factDto.impactedNote = this.refs['impactedNote-' + i].value;
             }else if (type === 'publicHoliday'){
-                fact.startDate = this.refs['startDate-' + i].value;
-                fact.endDate = this.refs['endDate-' + i].value;
-                fact.impactedNote = this.refs['impactedNote-' + i].value;
-                fact.customImpactedPoints = this.refs['customImpactedPoints-' + i].value;
+                factDto.startDate = this.refs['startDate-' + i].value;
+                factDto.endDate = this.refs['endDate-' + i].value;
+                factDto.impactedNote = this.refs['impactedNote-' + i].value;
+                factDto.customImpactedPoints = this.refs['customImpactedPoints-' + i].value;
             }else if (type === 'personalLeave'){
-                fact.name = this.refs['name-' + i].value;
-                fact.startDate = this.refs['startDate-' + i].value;
-                fact.endDate = this.refs['endDate-' + i].value;
-                fact.impactedNote = this.refs['impactedNote-' + i].value;
-                fact.customImpactedPoints = this.refs['customImpactedPoints-' + i].value;
+                factDto.name = this.refs['name-' + i].value;
+                factDto.startDate = this.refs['startDate-' + i].value;
+                factDto.endDate = this.refs['endDate-' + i].value;
+                factDto.impactedNote = this.refs['impactedNote-' + i].value;
+                factDto.customImpactedPoints = this.refs['customImpactedPoints-' + i].value;
             }
-            
 
-            factList.push(fact);
+
+            factListDto.push(factDto);
         }
-        return factList;
+        return factListDto;
     },
     handleSubmit(e) {
         e.preventDefault();
@@ -61,7 +67,7 @@ var EditReleaseForm = React.createClass({
         var buffer = this.refs.releaseBuffer.value || 0.5;
         var checkedWay = document.querySelector('input[name="wayToCalculateDevelopmentIteration"]:checked');
         var adjustFunc = checkedWay ? checkedWay.value : 'Ceil';
-        var factList = this.getFactList();
+        var factList = this.getFactListDto();
 
         let release = {
             name,
@@ -92,22 +98,23 @@ var EditReleaseForm = React.createClass({
     },
     handleFactTypeChange(e) {
         var index = parseInt(e.target.id.split('-')[1]);
-        this.state.factList[index].type = e.target.value;
+        // this.state.factList[index].type = e.target.value;
         this.setState(this.state);
     },
     render() {
-        if (this.props.release === undefined){
-            return <div>123</div>;
+        var self = this;
+        let editingReleasePlan = this.state.editingReleasePlan;
+        if (Util.isEmptyObject(editingReleasePlan)){
+            return <div></div>;
         }
 
-        var self = this;
         let basicInfo = (
             <div>
-                <label>Name <input ref="releaseName" type="text" defaultValue={this.props.release.get('name')} /></label><br/>
-                <label>Scope <input ref="releaseScope" type="number" defaultValue={this.props.release.get('scope')} /></label><br/>
-                <label>Start Date <input ref="releaseStartDate" type="date" defaultValue={this.props.release.get('startDate')}  /></label><br/>
-                <label>Regression Iterations <input ref="releaseRegressionIterations" type="number" step="0.1" defaultValue="1" defaultValue={this.props.release.get('regressionIterations')}/></label><br/>
-                <label>Buffer <input ref="releaseBuffer" type="number" step="0.1" defaultValue={this.props.release.get('buffer')}/></label><br/>
+                <label>Name <input ref="releaseName" type="text" defaultValue={editingReleasePlan['name']} /></label><br/>
+                <label>Scope <input ref="releaseScope" type="number" defaultValue={editingReleasePlan['scope']} /></label><br/>
+                <label>Start Date <input ref="releaseStartDate" type="date" defaultValue={editingReleasePlan['startDate']}  /></label><br/>
+                <label>Regression Iterations <input ref="releaseRegressionIterations" type="number" step="0.1" defaultValue={editingReleasePlan['regressionIterations']}/></label><br/>
+                <label>Buffer <input ref="releaseBuffer" type="number" step="0.1" defaultValue={editingReleasePlan['buffer']}/></label><br/>
                 <label>Way To Calculate Development Iteration
                     <input type="radio" name="wayToCalculateDevelopmentIteration" ref="Ceil" value="Ceil" />Ceil
                     <input type="radio" name="wayToCalculateDevelopmentIteration" ref="RoundToHalf" value="RoundToHalf"/>Round to Half(2.3 or 2.7 to 2.5)
@@ -174,7 +181,7 @@ var EditReleaseForm = React.createClass({
                 <form hidden={this.state.isFormClosed} onSubmit={this.handleSubmit}>
                     <h3>Edit Release Plan</h3>
                     {basicInfo}
-                    {this.state.factList.map(function (fact, index) {
+                    {editingReleasePlan['factList'].map(function (fact, index) {
                         let defaultValue = fact.type ? fact.type : 'other';
                         return (
                             <div key={'fact' + index }>
@@ -184,7 +191,7 @@ var EditReleaseForm = React.createClass({
                                     <option value="other">Other</option>
                                 </select>
                                 { (() => {
-                                    switch(self.state.factList[index].type){
+                                    switch(self.state.editingReleasePlan.factList[index].type){
                                         case "other":
                                             return otherFact(index, fact);
                                         case "publicHoliday":

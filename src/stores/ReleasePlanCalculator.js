@@ -115,29 +115,27 @@ function _calculateReleasePlanForOneRelease(release, startDate, delayedDays) {
     return release;
 }
 
-function calculateReleasePlan(originalRawReleaseList) {
-    var rawReleaseList = JSON.parse(JSON.stringify(originalRawReleaseList));
-
-    if (rawReleaseList.length === 0){
+function calculateReleasePlan(releasePlanList) {
+    if (releasePlanList.length === 0){
         return [];
     }
 
-    var firstRelease = rawReleaseList[0];
+    var firstRelease = releasePlanList[0];
     var firstStartDate = _adjustStartDate(new Date(firstRelease['startDate']));
     var bufferByDay = firstRelease['buffer'] * _getDaysInOneIteration();
     var releaseList = [];
     releaseList.push(_calculateReleasePlanForOneRelease(firstRelease, firstStartDate, bufferByDay));
 
-    for(let i = 1; i < rawReleaseList.length; ++i){
-        var release = rawReleaseList[i];
+    for(let i = 1; i < releasePlanList.length; ++i){
+        var release = releasePlanList[i];
         var lastReleaseDate = new Date(releaseList[i - 1]['bestReleaseDate']);
         var startDate = lastReleaseDate;
         startDate.setDate(lastReleaseDate.getDate() + 1);
         startDate = _adjustStartDate(startDate);
 
         var mayDelayDay = 0;
-        for (let j = 0; j < rawReleaseList.length; ++j){
-            mayDelayDay += rawReleaseList[j]['buffer'] * _getDaysInOneIteration();
+        for (let j = 0; j < releasePlanList.length; ++j){
+            mayDelayDay += releasePlanList[j]['buffer'] * _getDaysInOneIteration();
         }
         releaseList.push(_calculateReleasePlanForOneRelease(release, startDate, mayDelayDay));
     }
