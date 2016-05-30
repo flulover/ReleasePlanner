@@ -38,10 +38,17 @@ function getOverlapDateRange(startDate1, endDate1, startDate2, endDate2) {
 }
 
 function toJSON(avData){
+    if (avData === undefined || avData ===null){
+        return {};
+    }
     return JSON.parse(JSON.stringify(avData));
 }
 
 function isEmptyObject(obj) {
+    if (obj=== undefined || obj===null){
+        return true;
+    }
+
     return Object.keys(obj).length === 0;
 }
 
