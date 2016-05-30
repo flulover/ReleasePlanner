@@ -12,7 +12,7 @@ var EditReleaseForm = React.createClass({
     getInitialState() {
         return {
             isFormClosed: true,
-            editingReleasePlan: undefined,
+            editingReleasePlan: {},
         };
     },
     componentDidMount() {
