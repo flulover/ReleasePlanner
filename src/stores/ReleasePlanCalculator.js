@@ -104,7 +104,7 @@ function _calculateReleasePlanForOneRelease(release, startDate, delayedDays) {
     var daysInOneIteration = _getDaysInOneIteration();
     var daysInThisRelease = daysInOneIteration * developmentIterationCount;
     var daysInRegressionTest = release['regressionIterations'] * daysInOneIteration;
-    var bestReleaseDate = startDate;
+    var bestReleaseDate = new Date(startDate);
     bestReleaseDate.setDate(bestReleaseDate.getDate() + daysInThisRelease + daysInRegressionTest);
     release['bestReleaseDate'] = bestReleaseDate.toDateString();
 
