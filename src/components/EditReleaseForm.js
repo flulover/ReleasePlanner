@@ -70,6 +70,7 @@ var EditReleaseForm = React.createClass({
         var factList = this.getFactListDto();
 
         let release = {
+            objectId: this.state.editingReleasePlan.objectId,
             name,
             scope,
             startDate,
@@ -79,7 +80,7 @@ var EditReleaseForm = React.createClass({
             factList
         };
 
-        ActionFactory.addReleasePlan(release);
+        ActionFactory.updateReleasePlan(release);
         this.setState({
             isFormClosed: true
         });

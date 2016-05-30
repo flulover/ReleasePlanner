@@ -3,12 +3,12 @@
  * Created by yzzhou on 5/11/16.
  */
 
-import Dispatcher from '../dispatcher/dispatcher';
-import Assign from 'object-assign';
-import { EventEmitter } from 'events';
-import Constant from '../constants/constants';
-import ReleaePlanCalculator from './ReleasePlanCalculator';
-import Util from '../util/Util';
+import Dispatcher from "../dispatcher/dispatcher";
+import Assign from "object-assign";
+import {EventEmitter} from "events";
+import Constant from "../constants/constants";
+import ReleaePlanCalculator from "./ReleasePlanCalculator";
+import Util from "../util/Util";
 
 var _releasePlanList = [];
 
@@ -19,6 +19,17 @@ function _addReleasePlan(release) {
     releaseAV.save().then((rawReleaseData) => {
         _releasePlanList.push(Util.toJSON(rawReleaseData));
         ReleasePlanStore.emitChange();
+    });
+}
+
+function _updateReleasePlan(releasePlan) {
+    let Release = AV.Object.extend('Release');
+    let query = new AV.Query(Release);
+    query.get(releasePlan.objectId).then(function(rawReleasePlan){
+        rawReleasePlan.set('name', releasePlan.name);
+        rawReleasePlan.save().then(function(){
+            ReleasePlanStore.emitChange();
+        });
     });
 }
 
@@ -72,6 +83,7 @@ Dispatcher.register(function (action) {
         'RELEASE_PLAN_LOAD': ReleasePlanStore.loadReleasePlans,
         'RELEASE_PLAN_ADD': _addReleasePlan,
         'RELEASE_PLAN_EDIT': _editReleasePlan,
+        'RELEASE_PLAN_UPDATE': _updateReleasePlan,
     };
 
     var mapFunc = actionMap[action.type];

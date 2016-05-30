@@ -29,10 +29,10 @@ var ActionFactory = {
             type: Constant.RELEASE_PLAN_LOAD
         });
     },
-    addReleasePlan(release) {
+    addReleasePlan(releasePlan) {
         Dispatcher.dispatch( {
             type: Constant.RELEASE_PLAN_ADD,
-            value: release
+            value: releasePlan
         });
     },
     editReleasePlan(releaseIndex){
@@ -40,7 +40,13 @@ var ActionFactory = {
             type: Constant.RELEASE_PLAN_EDIT,
             value: releaseIndex
         });
-    }
+    },
+    updateReleasePlan(releasePlan){
+        Dispatcher.dispatch( {
+            type: Constant.RELEASE_PLAN_UPDATE,
+            value: releasePlan
+        });
+    },
 };
 
 module.exports = ActionFactory;

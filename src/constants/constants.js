@@ -14,4 +14,5 @@ module.exports = KeyMirror({
     RELEASE_PLAN_CHANGE: null,
     RELEASE_PLAN_ADD: null,
     RELEASE_PLAN_EDIT: null,
+    RELEASE_PLAN_UPDATE: null,
 });
