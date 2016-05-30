@@ -194,7 +194,7 @@ var EditReleaseForm = React.createClass({
 
         return (
             <div>
-                <form hidden={this.state.isFormClosed} onSubmit={this.handleSubmit}>
+                <div hidden={this.state.isFormClosed} onSubmit={this.handleSubmit}>
                     <h3>Edit Release Plan</h3>
                     {basicInfo}
                     {editingReleasePlan['factList'].map(function (fact, index) {
@@ -222,7 +222,7 @@ var EditReleaseForm = React.createClass({
 
                     <input type="submit" value="Save"/>
                     <input type="button" onClick={this.handleCancel} value="Cancel"/>
-                </form>
+                </div>
             </div>
         );
     }

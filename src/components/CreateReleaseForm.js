@@ -37,7 +37,6 @@ var CreateReleaseForm = React.createClass({
                 fact.customImpactedPoints = this.refs['customImpactedPoints-' + i].value;
             }
             
-
             factList.push(fact);
         }
         return factList;
@@ -86,6 +85,11 @@ var CreateReleaseForm = React.createClass({
         var index = parseInt(e.target.id.split('-')[1]);
         this.state.factList[index].type = e.target.value;
         this.setState(this.state);
+    },
+    onRemoveFactButtonClicked(e){
+        const index = parseInt(e.target.id.split('-')[1]);
+        this.state.factList.splice(index, 1);
+        this.setState({factList: this.state.factList});
     },
     render() {
         var self = this;
@@ -160,7 +164,7 @@ var CreateReleaseForm = React.createClass({
         return (
             <div>
                 <button onClick={this.toggleReleaseForm}>Create Release Plan</button>
-                <form hidden={this.state.isFormClosed} onSubmit={this.handleSubmit}>
+                <div hidden={this.state.isFormClosed}>
                     <h3>Create Release Plan</h3>
                     {basicInfo}
                     {this.state.factList.map(function (fact, index) {
@@ -172,22 +176,31 @@ var CreateReleaseForm = React.createClass({
                                     <option value="other">Other</option>
                                 </select>
                                 { (() => {
+                                    let fact;
                                     switch(self.state.factList[index].type){
                                         case "other":
-                                            return otherFact(index);
+                                            fact = otherFact;
+                                            break;
                                         case "publicHoliday":
-                                            return publicHolidayFact(index);
+                                            fact = publicHolidayFact;
+                                            break;
                                         case "personalLeave":
-                                            return personalLeaveFact(index);
-                                } })()}
+                                            fact = personalLeaveFact;
+                                            break;
+                                    }
+                                    return <div>
+                                        <input type="button" value="Remove Fact" id={'removeButton-' + index} onClick={self.onRemoveFactButtonClicked} />
+                                        {fact(index)}
+                                    </div>
+                                })()}
                             </div>
                         );
                     })}
                     <input type="button" value="Add Fact" onClick={this.handleAddFact}/><br/><br/>
 
-                    <input type="submit" value="Save"/>
+                    <input type="button" value="Save" onClick={self.handleSubmit} />
                     <input type="button" onClick={this.handleCancel} value="Cancel"/>
-                </form>
+                </div>
             </div>
         );
     }
