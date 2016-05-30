@@ -1,12 +1,23 @@
 .icon-cog-outline{
    cursor:pointer;
 }
-.icon-cog-outline:hover{
-   margin-left: 1px;
+
+.icon-trash-empty{
+    cursor:pointer;
+    float:right;
+}
+
+.icon-trash-empty:hover{
+    color: #0088cc;
 }
 
 div{
    border-style: solid;
    border-width: 1px;
    border-color: #9cd9ff;
+}
+
+.remove-fact-button{
+    float: right;
+    background-color:red;
 }

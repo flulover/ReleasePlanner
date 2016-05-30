@@ -229,7 +229,7 @@ var EditReleaseForm = React.createClass({
                                             break;
                                     }
                                     return <div>
-                                        <input type="button" value="Remove Fact" id={'removeButton-' + index} onClick={self.onRemoveFactButtonClicked} />
+                                        <i className="icon-trash-empty" id={'removeButton-' + index} onClick={self.onRemoveFactButtonClicked} />
                                         {factComponent(index, fact)}
                                     </div>
                                 })()}
