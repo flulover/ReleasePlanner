@@ -20,6 +20,9 @@ var CreateReleaseForm = React.createClass({
         var factList = [];
         for (var i = 0; i < this.state.factList.length; ++i){
             var fact = this.state.factList[i];
+            if (fact === undefined){
+                continue;
+            }
             var type = fact.type;
             if (type === 'other'){
                 fact.impactedPoints = this.refs['impactedPoints-' + i].value;
@@ -88,7 +91,8 @@ var CreateReleaseForm = React.createClass({
     },
     onRemoveFactButtonClicked(e){
         const index = parseInt(e.target.id.split('-')[1]);
-        this.state.factList.splice(index, 1);
+        // this.state.factList.splice(index, 1);
+        delete this.state.factList[index];
         this.setState({factList: this.state.factList});
     },
     render() {
