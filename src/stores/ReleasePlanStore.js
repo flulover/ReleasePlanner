@@ -27,6 +27,13 @@ function _updateReleasePlan(releasePlan) {
     let query = new AV.Query(Release);
     query.get(releasePlan.objectId).then(function(rawReleasePlan){
         rawReleasePlan.set('name', releasePlan.name);
+        rawReleasePlan.set('scope', releasePlan.scope);
+        rawReleasePlan.set('startDate', releasePlan.startDate);
+        rawReleasePlan.set('adjustFunc', releasePlan.adjustFunc);
+        rawReleasePlan.set('regressionIterations', releasePlan.regressionIterations);
+        rawReleasePlan.set('buffer', releasePlan.buffer);
+        rawReleasePlan.set('factList', releasePlan.factList);
+
         rawReleasePlan.save().then(function(){
             ReleasePlanStore.emitChange();
         });
@@ -41,6 +48,7 @@ var ReleasePlanStore = Assign({}, EventEmitter.prototype, {
     loadReleasePlans() {
         var Release = AV.Object.extend('Release');
         var query = new AV.Query(Release);
+        query.addAscending('createdAt');
         query.find().then(function(rawReleasePlans) {
             if (rawReleasePlans.length == 0){
                 return;

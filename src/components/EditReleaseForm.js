@@ -12,7 +12,7 @@ var EditReleaseForm = React.createClass({
     getInitialState() {
         return {
             isFormClosed: true,
-            editingReleasePlan:{},
+            editingReleasePlan: undefined,
         };
     },
     componentDidMount() {
@@ -51,7 +51,6 @@ var EditReleaseForm = React.createClass({
                 factDto.impactedNote = this.refs['impactedNote-' + i].value;
                 factDto.customImpactedPoints = this.refs['customImpactedPoints-' + i].value;
             }
-
 
             factListDto.push(factDto);
         }
