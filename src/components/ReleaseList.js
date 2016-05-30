@@ -11,6 +11,9 @@ var ReleaseList = React.createClass({
         return (
             <ul>
                 {factList.map((fact, index) => {
+                    if (fact === undefined){
+                        return;
+                    }
                     let leaveNote = '';
                     if (fact.type === 'publicHoliday'){
                         let startDate = new Date(fact.startDate);

@@ -53,6 +53,10 @@ function _getImpactedPoint(release) {
     var impactedPoints = 0;
     for(var i = 0; i < factList.length; ++i){
         var fact = factList[i];
+        if (fact === undefined){
+            continue;
+        }
+
         if (fact.type === 'other'){
             impactedPoints += parseInt(factList[i].impactedPoints);
         }else if (fact.type === 'publicHoliday' ){

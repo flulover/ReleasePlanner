@@ -16,7 +16,7 @@ var CreateReleaseForm = React.createClass({
     toggleReleaseForm() {
         this.setState({isFormClosed: !this.state.isFormClosed});
     },
-    getFactList() {
+    getFactListDto() {
         var factList = [];
         for (var i = 0; i < this.state.factList.length; ++i){
             var fact = this.state.factList[i];
@@ -54,7 +54,7 @@ var CreateReleaseForm = React.createClass({
         var buffer = this.refs.releaseBuffer.value || 0.5;
         var checkedWay = document.querySelector('input[name="wayToCalculateDevelopmentIteration"]:checked');
         var adjustFunc = checkedWay ? checkedWay.value : 'Ceil';
-        var factList = this.getFactList();
+        var factList = this.getFactListDto();
 
         let release = {
             name,
@@ -91,7 +91,6 @@ var CreateReleaseForm = React.createClass({
     },
     onRemoveFactButtonClicked(e){
         const index = parseInt(e.target.id.split('-')[1]);
-        // this.state.factList.splice(index, 1);
         delete this.state.factList[index];
         this.setState({factList: this.state.factList});
     },
@@ -180,21 +179,21 @@ var CreateReleaseForm = React.createClass({
                                     <option value="other">Other</option>
                                 </select>
                                 { (() => {
-                                    let fact;
+                                    let factComponent;
                                     switch(self.state.factList[index].type){
                                         case "other":
-                                            fact = otherFact;
+                                            factComponent = otherFact;
                                             break;
                                         case "publicHoliday":
-                                            fact = publicHolidayFact;
+                                            factComponent = publicHolidayFact;
                                             break;
                                         case "personalLeave":
-                                            fact = personalLeaveFact;
+                                            factComponent = personalLeaveFact;
                                             break;
                                     }
                                     return <div>
                                         <input type="button" value="Remove Fact" id={'removeButton-' + index} onClick={self.onRemoveFactButtonClicked} />
-                                        {fact(index)}
+                                        {factComponent(index)}
                                     </div>
                                 })()}
                             </div>
