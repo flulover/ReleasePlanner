@@ -133,8 +133,14 @@ function calculateReleasePlan(releasePlanList) {
     for(let i = 1; i < releasePlanList.length; ++i){
         var release = releasePlanList[i];
         var lastReleaseDate = new Date(releaseList[i - 1]['bestReleaseDate']);
-        var startDate = lastReleaseDate;
-        startDate.setDate(lastReleaseDate.getDate() + 1);
+        let startDate;
+        if (releasePlanList[i].startDate === '1900-01-01'){
+            startDate = new Date(lastReleaseDate);
+            startDate.setDate(lastReleaseDate.getDate() + 1);
+        }else{
+            startDate = new Date(releasePlanList[i].startDate);
+        }
+
         startDate = _adjustStartDate(startDate);
 
         var mayDelayDay = 0;

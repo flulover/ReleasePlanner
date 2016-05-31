@@ -137,7 +137,7 @@ var EditReleaseForm = React.createClass({
             <div>
                 <label>Name <input ref="releaseName" type="text" value={editingReleasePlan['name']} onChange={self.onNameChanged} /></label><br/>
                 <label>Scope <input ref="releaseScope" type="number" value={editingReleasePlan['scope']} onChange={self.onScopeChanged} /></label><br/>
-                <label>Start Date <input ref="releaseStartDate" type="date" value={Util.formatDateToYYYYmmDD(editingReleasePlan['startDate'])} onChange={self.onStartDateChanged}  /></label><br/>
+                <label>Start Date <input ref="releaseStartDate" type="date" value={Util.formatDateToYYYYmmDD(new Date(editingReleasePlan['startDate']))} onChange={self.onStartDateChanged}  /></label><br/>
                 <label>Regression Iterations <input ref="releaseRegressionIterations" type="number" step="0.1" defaultValue={editingReleasePlan['regressionIterations']}/></label><br/>
                 <label>Buffer <input ref="releaseBuffer" type="number" step="0.1" value={editingReleasePlan['buffer']} onChange={self.onBufferChanged}/></label><br/>
                 <label>Way To Calculate Development Iteration
