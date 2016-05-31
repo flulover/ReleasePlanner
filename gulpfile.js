@@ -8,11 +8,12 @@ var browserify = require("browserify");
 var path =require('path');
 var fs = require('fs');
 var source = require('vinyl-source-stream');
+var notify = require('gulp-notify');
 
 gulp.task('default', function () {
 });
 
-gulp.task('watch', function () {
+gulp.task('watch', ['build'], function () {
     return gulp.watch(['src/**/*.js', '!src/App.js'], ['build']);
 });
 
@@ -22,7 +23,8 @@ gulp.task('build', function () {
         .bundle()
         .pipe(source('App.js'))
         .on('error', onError)
-        .pipe(gulp.dest('./src/'));
+        .pipe(gulp.dest('./src/'))
+        .pipe(notify('Build finished!'));
         // .pipe(fs.createWriteStream('./src/App.js));
         // .pipe(gulp.dest(path.resolve(__dirname, './src/App.js')));
 });
